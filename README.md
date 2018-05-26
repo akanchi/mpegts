@@ -1,2 +1,8 @@
 # mpegts
-a simple implement of mpegts(include muxer and demuxer)
+A simple implement of mpegts(include muxer and demuxer)
+
+
+# Usage
+```
+cd mpegts && cmake .
+```

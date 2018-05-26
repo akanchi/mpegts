@@ -36,6 +36,7 @@ int MpegTsDemuxer::decode(SimpleBuffer *in, TsFrame *&out)
                 pat_header.decode(in);
                 in->read_2bytes();
                 _pmt_id = in->read_2bytes() & 0x1fff;
+                pat_header.print();
             }
         }
 
@@ -55,6 +56,7 @@ int MpegTsDemuxer::decode(SimpleBuffer *in, TsFrame *&out)
                     _ts_frames[pmt_header.infos[i]->elementary_PID] = std::shared_ptr<TsFrame>(new TsFrame(pmt_header.infos[i]->stream_type));
                     stream_pid_map[pmt_header.infos[i]->stream_type] = pmt_header.infos[i]->elementary_PID;
                 }
+                pmt_header.print();
             }
         }
 
@@ -64,7 +66,7 @@ int MpegTsDemuxer::decode(SimpleBuffer *in, TsFrame *&out)
                 adapt_field.decode(in);
                 in->skip(adapt_field.adaptation_field_length > 0 ? (adapt_field.adaptation_field_length - 1) : 0);
             }
-                
+
             if (ts_header.adaptation_field_control == 0x01 || ts_header.adaptation_field_control == 0x03) {
                 PESHeader pes_header;
                 if (ts_header.payload_unit_start_indicator == 0x01) {

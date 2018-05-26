@@ -58,6 +58,7 @@ public:
 public:
     void encode(SimpleBuffer *sb);
     void decode(SimpleBuffer *sb);
+    void print();
 
 public:
     uint8_t table_id;                       // 8 bits
@@ -84,6 +85,7 @@ public:
     void encode(SimpleBuffer *sb);
     void decode(SimpleBuffer *sb);
     uint16_t size();
+    void print();
 
 public:
     uint8_t stream_type;                    // 8 bits
@@ -91,6 +93,7 @@ public:
     uint16_t elementary_PID;                // 13 bits
     uint8_t reserved1;                      // 4 bits
     uint16_t ES_info_length;                // 12 bits
+    std::string ES_info;
 };
 
 class PMTHeader
@@ -103,6 +106,7 @@ public:
     void encode(SimpleBuffer *sb);
     void decode(SimpleBuffer *sb);
     uint16_t size();
+    void print();
 
 public:
     uint8_t table_id;                       // 8 bits

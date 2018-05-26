@@ -6,8 +6,6 @@
 #include "simple_buffer.h"
 #include "ts_packet.h"
 
-std::ofstream outts("out.ts", std::ios::binary);
-
 std::map<uint16_t, std::ofstream*> file_map;
 
 void write_file(TsFrame *frame)
@@ -28,14 +26,29 @@ void write_file(TsFrame *frame)
     file_map[frame->pid]->write(frame->_data->data(), frame->_data->size());
 }
 
-int main()
+int main(int argc, char *argv[])
 {
+    if (argc <= 1) {
+        std::cout << "usage: ./mpegts.out in.ts" << std::endl;
+        return 0;
+    }
+
+    std::string in_file_name = argv[1];
+    std::string out_file_name = "out.ts";
+    if (argc > 2) {
+        out_file_name = argv[2];
+    }
+
+    std::cout << "input ts: " << in_file_name << std::endl;
+    std::cout << "output ts: " << out_file_name << std::endl;
+
+    std::ifstream ifile(in_file_name, std::ios::binary | std::ios::in);
+    std::ofstream outts(out_file_name, std::ios::binary);
+
     std::shared_ptr<MpegTsMuxer> muxer(new MpegTsMuxer);
 
     MpegTsDemuxer demuxer;
     char packet[188] = { 0 };
-    std::ifstream ifile("./resource/test1.ts", std::ios::binary | std::ios::in);
-    std::cout << ifile.is_open() << std::endl;
 
     SimpleBuffer in;
     SimpleBuffer out;

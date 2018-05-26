@@ -141,6 +141,24 @@ void PATHeader::decode(SimpleBuffer *sb)
     last_section_number = sb->read_1byte();
 }
 
+void PATHeader::print()
+{
+    std::cout << "----------PAT information----------" << std::endl;
+    std::cout << "table_id: " << std::to_string(table_id) << std::endl;
+    std::cout << "section_syntax_indicator: " << std::to_string(section_syntax_indicator) << std::endl;
+    std::cout << "b0: " << std::to_string(b0) << std::endl;
+    std::cout << "reserved0: " << std::to_string(reserved0) << std::endl;
+    std::cout << "section_length: " << std::to_string(section_length) << std::endl;
+    std::cout << "transport_stream_id: " << std::to_string(transport_stream_id) << std::endl;
+    std::cout << "reserved1: " << std::to_string(reserved1) << std::endl;
+    std::cout << "version_number: " << std::to_string(version_number) << std::endl;
+    std::cout << "current_next_indicator: " << std::to_string(current_next_indicator) << std::endl;
+    std::cout << "section_number: " << std::to_string(section_number) << std::endl;
+    std::cout << "last_section_number: " << std::to_string(last_section_number) << std::endl;
+    std::cout << std::endl;
+    std::flush(std::cout);
+}
+
 PMTElementInfo::PMTElementInfo(uint8_t st, uint16_t pid)
     : stream_type(st)
     , reserved0(0x7)
@@ -191,14 +209,26 @@ void PMTElementInfo::decode(SimpleBuffer *sb)
     reserved1 = (b3b4 >> 12) & 0xF;
     ES_info_length = b3b4 & 0xFFF;
 
-    for (int i = 0; i < ES_info_length; i++) {
-        sb->read_1byte();
+    if (ES_info_length > 0) {
+        ES_info = sb->read_string(ES_info_length);
     }
 }
 
 uint16_t PMTElementInfo::size()
 {
     return 5 + ES_info_length;
+}
+
+void PMTElementInfo::print()
+{
+    std::cout << "**********PMTElement information**********" << std::endl;
+    std::cout << "stream_type: " << std::to_string(stream_type) << std::endl;
+    std::cout << "reserved0: " << std::to_string(reserved0) << std::endl;
+    std::cout << "elementary_PID: " << std::to_string(elementary_PID) << std::endl;
+    std::cout << "reserved1: " << std::to_string(reserved1) << std::endl;
+    std::cout << "ES_info_length: " << std::to_string(ES_info_length) << std::endl;
+    std::cout << "ES_info: " << ES_info << std::endl;
+    std::flush(std::cout);
 }
 
 PMTHeader::PMTHeader()
@@ -308,6 +338,31 @@ uint16_t PMTHeader::size()
     }
 
     return ret;
+}
+
+void PMTHeader::print()
+{
+    std::cout << "----------PMT information----------" << std::endl;
+    std::cout << "table_id: " << std::to_string(table_id) << std::endl;
+    std::cout << "section_syntax_indicator: " << std::to_string(section_syntax_indicator) << std::endl;
+    std::cout << "b0: " << std::to_string(b0) << std::endl;
+    std::cout << "reserved0: " << std::to_string(reserved0) << std::endl;
+    std::cout << "section_length: " << std::to_string(section_length) << std::endl;
+    std::cout << "program_number: " << std::to_string(program_number) << std::endl;
+    std::cout << "reserved1: " << std::to_string(reserved1) << std::endl;
+    std::cout << "version_number: " << std::to_string(version_number) << std::endl;
+    std::cout << "current_next_indicator: " << std::to_string(current_next_indicator) << std::endl;
+    std::cout << "section_number: " << std::to_string(section_number) << std::endl;
+    std::cout << "last_section_number: " << std::to_string(last_section_number) << std::endl;
+    std::cout << "reserved2: " << std::to_string(reserved2) << std::endl;
+    std::cout << "PCR_PID: " << std::to_string(PCR_PID) << std::endl;
+    std::cout << "reserved3: " << std::to_string(reserved3) << std::endl;
+    std::cout << "program_info_length: " << std::to_string(program_info_length) << std::endl;
+    for (int i = 0; i < (int)infos.size(); i++) {
+        infos[i]->print();
+    }
+    std::cout << std::endl;
+    std::flush(std::cout);
 }
 
 AdaptationFieldHeader::AdaptationFieldHeader()

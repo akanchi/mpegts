@@ -8,8 +8,6 @@ static const uint16_t MPEGTS_NULL_PACKET_PID = 0x1FFF;
 static const uint16_t MPEGTS_PAT_PID = 0x00;
 static const uint16_t MPEGTS_PMT_PID = 0x100;
 static const uint16_t MPEGTS_PCR_PID = 0x110;
-static const uint16_t MPEGTS_AUDIO_AAC_PID = 0X200;
-static const uint16_t MPEGTS_VIDEO_AVC_PID = 0x400;
 
 class MpegTsAdaptationFieldType
 {
@@ -145,11 +143,10 @@ void MpegTsMuxer::create_pes(TsFrame *frame, SimpleBuffer *sb)
     bool first = true;
     while (!frame->_data->empty()) {
         SimpleBuffer packet(188);
-        char *pdata = packet.data();
 
         TsHeader ts_header;
         ts_header.pid = frame->pid;
-        ts_header.adaptation_field_control = 0x01;
+        ts_header.adaptation_field_control = MpegTsAdaptationFieldType::payload_only;
         ts_header.continuity_counter = get_cc(frame->stream_type);
 
         if (first) {
@@ -199,7 +196,7 @@ void MpegTsMuxer::create_pes(TsFrame *frame, SimpleBuffer *sb)
 
         uint32_t body_size = packet.size() - packet.pos();
         uint32_t in_size = frame->_data->size() - frame->_data->pos();
-         if (body_size <= in_size) {
+         if (body_size <= in_size) {    // MpegTsAdaptationFieldType::payload_only or MpegTsAdaptationFieldType::payload_adaption_both for AVC
              packet.write_string(frame->_data->read_string(body_size));
          } else {
              uint16_t stuff_size = body_size - in_size;
@@ -210,6 +207,7 @@ void MpegTsMuxer::create_pes(TsFrame *frame, SimpleBuffer *sb)
                  packet.skip(stuff_size);
                  packet.data()[4] += stuff_size;
              } else {
+                 // adaptation_field_control |= 0x20 == MpegTsAdaptationFieldType::payload_adaption_both
                  packet.data()[3] |= 0x20;
                  packet.set_data(188 - 4 - stuff_size, packet.data() + 4, packet.pos() - 4);
                  packet.skip(stuff_size);

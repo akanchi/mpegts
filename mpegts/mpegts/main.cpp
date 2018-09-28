@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
     }
 
     std::string in_file_name = argv[1];
-    std::string out_file_name = "out.ts";
+    std::string out_file_name = in_file_name + "out.ts";
     if (argc > 2) {
         out_file_name = argv[2];
     }

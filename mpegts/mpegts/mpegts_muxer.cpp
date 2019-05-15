@@ -3,6 +3,7 @@
 #include "ts_packet.h"
 #include "crc.h"
 #include <string.h>
+#include "common.h"
 
 static const uint16_t MPEGTS_NULL_PACKET_PID = 0x1FFF;
 static const uint16_t MPEGTS_PAT_PID = 0x00;
@@ -277,30 +278,6 @@ void MpegTsMuxer::encode(TsFrame *frame, std::map<uint8_t, int> stream_pid_map, 
     }
 
     create_pes(frame, sb);
-}
-
-void MpegTsMuxer::write_pcr(SimpleBuffer *sb, uint64_t pcr)
-{
-    sb->write_1byte((int8_t)(pcr >> 25));
-    sb->write_1byte((int8_t)(pcr >> 17));
-    sb->write_1byte((int8_t)(pcr >> 9));
-    sb->write_1byte((int8_t)(pcr >> 1));
-    sb->write_1byte((int8_t)(pcr << 7 | 0x7e));
-    sb->write_1byte(0);
-}
-
-void MpegTsMuxer::write_pts(SimpleBuffer *sb, uint32_t fb, uint64_t pts)
-{
-    uint32_t val;
-
-    val = fb << 4 | (((pts >> 30) & 0x07) << 1) | 1;
-    sb->write_1byte((int8_t)val);
-
-    val = (((pts >> 15) & 0x7fff) << 1) | 1;
-    sb->write_2bytes((int16_t)val);
-
-    val = (((pts) & 0x7fff) << 1) | 1;
-    sb->write_2bytes((int16_t)val);
 }
 
 uint8_t MpegTsMuxer::get_cc(uint32_t with_pid)

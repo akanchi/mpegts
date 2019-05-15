@@ -21,8 +21,6 @@ public:
     void encode(TsFrame *frame, std::map<uint8_t, int> stream_pid_map, SimpleBuffer *sb);
 
 private:
-    void write_pcr(SimpleBuffer *sb, uint64_t pcr);
-    void write_pts(SimpleBuffer *sb, uint32_t fb, uint64_t pts);
     uint8_t get_cc(uint32_t with_pid);
     bool should_create_pat();
 

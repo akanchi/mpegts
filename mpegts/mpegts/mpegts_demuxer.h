@@ -19,11 +19,9 @@ public:
     std::map<uint8_t, int> stream_pid_map;
 
 private:
-    uint64_t read_pts(SimpleBuffer *sb);
-
-private:
     // pid, frame
     std::map<int, std::shared_ptr<TsFrame>> _ts_frames;
     int _pmt_id;
+    int _pcr_id;
 };
 

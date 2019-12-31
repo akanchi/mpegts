@@ -7,6 +7,13 @@
 
 class SimpleBuffer;
 
+class MpegTsStream
+{
+public:
+    static const uint8_t AAC = 0x0f;
+    static const uint8_t AVC = 0x1b;
+};
+
 class TsFrame
 {
 public:

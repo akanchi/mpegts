@@ -75,6 +75,7 @@ void SimpleBuffer::append(const char* bytes, int size)
         return;
 
     _data.insert(_data.end(), bytes, bytes + size);
+    _pos += size;
 }
 
 int8_t SimpleBuffer::read_1byte()

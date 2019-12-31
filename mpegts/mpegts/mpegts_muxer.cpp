@@ -23,13 +23,6 @@ public:
     static const uint8_t payload_adaption_both = 0x03;
 };
 
-class MpegTsStream
-{
-public:
-    static const uint8_t AAC = 0x0f;
-    static const uint8_t AVC = 0x1b;
-};
-
 MpegTsMuxer::MpegTsMuxer()
 {
 }

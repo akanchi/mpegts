@@ -5,6 +5,7 @@
 #include "mpegts_demuxer.h"
 #include "simple_buffer.h"
 #include "ts_packet.h"
+#include "flv_muxer.h"
 
 std::map<uint16_t, std::ofstream*> file_map;
 
@@ -35,6 +36,7 @@ int main(int argc, char *argv[])
 
     std::string in_file_name = argv[1];
     std::string out_file_name = in_file_name + "out.ts";
+    std::string out_flv_fileName = in_file_name + "out.flv";
     if (argc > 2) {
         out_file_name = argv[2];
     }
@@ -44,8 +46,12 @@ int main(int argc, char *argv[])
 
     std::ifstream ifile(in_file_name, std::ios::binary | std::ios::in);
     std::ofstream outts(out_file_name, std::ios::binary);
+    std::ofstream outflv(out_flv_fileName, std::ios::binary);
 
     std::shared_ptr<MpegTsMuxer> muxer(new MpegTsMuxer);
+    std::shared_ptr<FLVMuxer> flvMuxer(new FLVMuxer);
+    SimpleBuffer flvOutBuffer;
+    flvMuxer->write_header(&flvOutBuffer);
 
     MpegTsDemuxer demuxer;
     char packet[188] = { 0 };
@@ -56,13 +62,18 @@ int main(int argc, char *argv[])
     while (!ifile.eof()) {
         ifile.read(packet, 188);
         in.append(packet, 188);
+        in.skip(-188);
 
         TsFrame *frame = nullptr;
         demuxer.decode(&in, frame);
 
         write_file(frame);
         if (frame) {
+            frame->_data->skip(0 - frame->_data->pos());
             muxer->encode(frame, demuxer.stream_pid_map, &out);
+            flvMuxer->write_body(frame, &flvOutBuffer);
+            outflv.write(flvOutBuffer.data(), flvOutBuffer.size());
+            flvOutBuffer.erase(flvOutBuffer.size());
             outts.write(out.data(), out.size());
             out.erase(out.size());
         }

@@ -52,6 +52,7 @@ int main(int argc, char *argv[])
     std::shared_ptr<FLVMuxer> flvMuxer(new FLVMuxer);
     SimpleBuffer flvOutBuffer;
     flvMuxer->write_header(&flvOutBuffer);
+    flvMuxer->write_metadata(&flvOutBuffer, 0);
 
     MpegTsDemuxer demuxer;
     char packet[188] = { 0 };
@@ -77,6 +78,14 @@ int main(int argc, char *argv[])
             outts.write(out.data(), out.size());
             out.erase(out.size());
         }
+    }
+
+    {
+        outflv.seekp(0, std::ios::end);
+        uint32_t fileSize = outflv.tellp();
+        flvMuxer->write_metadata(&flvOutBuffer, fileSize);
+        outflv.seekp(13, std::ios::beg);
+        outflv.write(flvOutBuffer.data(), flvOutBuffer.size());
     }
 
     ifile.close();

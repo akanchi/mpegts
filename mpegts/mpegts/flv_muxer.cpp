@@ -5,6 +5,7 @@
 #include "flv_muxer.h"
 #include "ts_packet.h"
 #include "simple_buffer.h"
+#include "../../amf0/amf0/amf0.h"
 
 static const int FLV_TAG_HEADER_SIZE = 11;
 
@@ -13,6 +14,7 @@ class FLVTagType
 public:
     static const uint8_t Audio = 8;
     static const uint8_t Video = 9;
+    static const uint8_t ScriptData = 18;
 };
 
 class NALU
@@ -66,6 +68,9 @@ inline int get_nalu(NALU &nalu, char *data, uint32_t size, uint32_t index)
 }
 
 FLVMuxer::FLVMuxer()
+    : has_set_start_pts(false)
+    , start_pts(0)
+    , duration(0)
 {
 
 }
@@ -94,6 +99,8 @@ int FLVMuxer::write_body(TsFrame *frame, SimpleBuffer *sb)
     } else if (frame->stream_type == MpegTsStream::AVC) {
         write_avc_tag(frame, sb);
     }
+
+    calc_duration(frame->pts/90);
 
     return 0;
 }
@@ -173,6 +180,39 @@ int FLVMuxer::write_avc_tag(TsFrame *frame, SimpleBuffer *sb)
             sb->write_4bytes(FLV_TAG_HEADER_SIZE + bodySize);
         }
     } while (index < size && index > 0);
+
+    return 0;
+}
+
+void FLVMuxer::calc_duration(uint32_t pts)
+{
+    if (!has_set_start_pts) {
+        has_set_start_pts = true;
+        start_pts = pts;
+    }
+
+    duration = pts - start_pts;
+}
+
+int FLVMuxer::write_metadata(SimpleBuffer *sb, uint32_t fileSize)
+{
+    SimpleBuffer bodySb;
+
+    Amf0String amfOnMetaData("onMetaData");
+    amfOnMetaData.write(&bodySb);
+
+    Amf0EcmaArray amfEcmaArray;
+    amfEcmaArray.put("duration", new Amf0Number(duration / 1000.));
+    amfEcmaArray.put("filesize", new Amf0Number(fileSize));
+    amfEcmaArray.write(&bodySb);
+
+    sb->write_1byte(FLVTagType::ScriptData);
+    sb->write_3bytes(bodySb.size());
+    sb->write_3bytes(0);
+    sb->write_1byte(0);
+    sb->write_3bytes(0x00);
+
+    sb->append(bodySb.data(), bodySb.size());
 
     return 0;
 }

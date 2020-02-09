@@ -1,10 +1,10 @@
 #include <iostream>
 #include <memory>
 #include <fstream>
-#include "mpegts_muxer.h"
-#include "mpegts_demuxer.h"
-#include "simple_buffer.h"
-#include "ts_packet.h"
+#include "mpegts/mpegts_muxer.h"
+#include "mpegts/mpegts_demuxer.h"
+#include "mpegts/simple_buffer.h"
+#include "mpegts/ts_packet.h"
 
 std::map<uint16_t, std::ofstream*> file_map;
 

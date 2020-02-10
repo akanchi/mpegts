@@ -20,6 +20,7 @@ int main(int argc, char *argv[])
     in.append(packet, 188);
     TsFrame *frame = nullptr;
     demuxer.decode(&in, frame);
+
     if (frame) {
 
       std::cout << "GOT: " << unsigned(frame->stream_type);

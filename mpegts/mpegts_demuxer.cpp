@@ -1,7 +1,6 @@
 #include "mpegts_demuxer.h"
 
 #include "simple_buffer.h"
-#include "ts_packet.h"
 #include "common.h"
 
 MpegTsDemuxer::MpegTsDemuxer()
@@ -34,11 +33,11 @@ int MpegTsDemuxer::decode(SimpleBuffer *in, TsFrame *&out)
                 if (ts_header.payload_unit_start_indicator == 0x01) {
                     uint8_t point_field = in->read_1byte();
                 }
-                PATHeader pat_header;
+
                 pat_header.decode(in);
                 in->read_2bytes();
                 _pmt_id = in->read_2bytes() & 0x1fff;
-                pat_header.print();
+                //pat_header.print();
             }
         }
 
@@ -52,14 +51,14 @@ int MpegTsDemuxer::decode(SimpleBuffer *in, TsFrame *&out)
 
             if (ts_header.payload_unit_start_indicator == 0x01) {
                 uint8_t point_field = in->read_1byte();
-                PMTHeader pmt_header;
+
                 pmt_header.decode(in);
                 _pcr_id = pmt_header.PCR_PID;
                 for (size_t i = 0; i < pmt_header.infos.size(); i++) {
                     _ts_frames[pmt_header.infos[i]->elementary_PID] = std::shared_ptr<TsFrame>(new TsFrame(pmt_header.infos[i]->stream_type));
                     stream_pid_map[pmt_header.infos[i]->stream_type] = pmt_header.infos[i]->elementary_PID;
                 }
-                pmt_header.print();
+                //pmt_header.print();
             }
         }
 

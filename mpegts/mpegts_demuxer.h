@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ts_packet.h"
 #include <stdint.h>
 #include <memory>
 #include <map>
@@ -17,6 +18,12 @@ public:
     int decode(SimpleBuffer *in, TsFrame *&out);
     // stream, pid
     std::map<uint8_t, int> stream_pid_map;
+
+    // PAT
+    PATHeader pat_header;
+
+    // PMT
+    PMTHeader pmt_header;
 
 private:
     // pid, frame

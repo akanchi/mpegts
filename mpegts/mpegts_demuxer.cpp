@@ -37,6 +37,7 @@ int MpegTsDemuxer::decode(SimpleBuffer *in, TsFrame *&out)
                 pat_header.decode(in);
                 in->read_2bytes();
                 _pmt_id = in->read_2bytes() & 0x1fff;
+                patIsValid = true;
                 //pat_header.print();
             }
         }
@@ -58,6 +59,7 @@ int MpegTsDemuxer::decode(SimpleBuffer *in, TsFrame *&out)
                     _ts_frames[pmt_header.infos[i]->elementary_PID] = std::shared_ptr<TsFrame>(new TsFrame(pmt_header.infos[i]->stream_type));
                     stream_pid_map[pmt_header.infos[i]->stream_type] = pmt_header.infos[i]->elementary_PID;
                 }
+                pmtIsValid = true;
                 //pmt_header.print();
             }
         }

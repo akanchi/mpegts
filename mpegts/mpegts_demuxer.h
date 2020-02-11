@@ -21,9 +21,11 @@ public:
 
     // PAT
     PATHeader pat_header;
+    bool patIsValid = false;
 
     // PMT
     PMTHeader pmt_header;
+    bool pmtIsValid = false;
 
 private:
     // pid, frame

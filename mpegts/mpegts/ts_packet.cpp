@@ -6,6 +6,7 @@
 TsFrame::TsFrame()
     : completed(false)
     , pid(0)
+    , expected_pes_packet_length(0)
 {
     _data.reset(new SimpleBuffer);
 }
@@ -14,6 +15,7 @@ TsFrame::TsFrame(uint8_t st)
     : stream_type(st)
     , completed(false)
     , pid(0)
+    , expected_pes_packet_length(0)
 {
     _data.reset(new SimpleBuffer);
 }
@@ -27,6 +29,7 @@ void TsFrame::reset()
 {
     pid = 0;
     completed = false;
+    expected_pes_packet_length = 0;
     _data.reset(new SimpleBuffer);
 }
 

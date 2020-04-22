@@ -95,6 +95,7 @@ int MpegTsDemuxer::decode(SimpleBuffer *in, TsFrame *&out)
 
                     pes_header.decode(in);
                     _ts_frames[ts_header.pid]->stream_id = pes_header.stream_id;
+                    _ts_frames[ts_header.pid]->expected_pes_packet_length = pes_header.pes_packet_length;
                     if (pes_header.pts_dts_flags == 0x02) {
                         _ts_frames[ts_header.pid]->pts = _ts_frames[ts_header.pid]->dts = read_pts(in);
                     } else if (pes_header.pts_dts_flags == 0x03) {
@@ -111,7 +112,13 @@ int MpegTsDemuxer::decode(SimpleBuffer *in, TsFrame *&out)
                         break;
                     }
                 }
-                _ts_frames[ts_header.pid]->_data->append(in->data() + in->pos(), 188 - in->pos() - pos);
+                
+                if(_ts_frames[ts_header.pid]->expected_pes_packet_length != 0 && _ts_frames[ts_header.pid]->_data->size() + 188 - in->pos() - pos > _ts_frames[ts_header.pid]->expected_pes_packet_length) {
+                    _ts_frames[ts_header.pid]->_data->append(in->data() + in->pos(), _ts_frames[ts_header.pid]->expected_pes_packet_length - _ts_frames[ts_header.pid]->_data->size());
+                } else {
+                    _ts_frames[ts_header.pid]->_data->append(in->data() + in->pos(), 188 - in->pos() - pos);
+                }
+                
             }
         } else if (_pcr_id != 0 && _pcr_id == ts_header.pid) {
             AdaptationFieldHeader adapt_field;

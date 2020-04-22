@@ -33,6 +33,7 @@ public:
     uint8_t stream_type;
     uint8_t stream_id;
     uint16_t pid;
+    uint16_t expected_pes_packet_length;
     bool completed;
 };
 

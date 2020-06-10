@@ -31,7 +31,7 @@ MpegTsMuxer::~MpegTsMuxer()
 {
 }
 
-void MpegTsMuxer::create_pat(SimpleBuffer *sb, uint8_t cc)
+void MpegTsMuxer::create_pat(SimpleBuffer *sb, uint16_t pmt_pid, uint8_t cc)
 {
     int pos = sb->pos();
     TsHeader ts_header;
@@ -61,7 +61,7 @@ void MpegTsMuxer::create_pat(SimpleBuffer *sb, uint8_t cc)
     //program_number
     uint16_t program_number = 0x0001;
     //program_map_PID
-    uint16_t program_map_PID = 0xe000 | (MPEGTS_PMT_PID & 0x1fff);
+    uint16_t program_map_PID = 0xe000 | (pmt_pid & 0x1fff);
 
     unsigned int section_length = 4 + 4 + 5;
     pat_header.section_length = section_length & 0x3ff;
@@ -80,7 +80,7 @@ void MpegTsMuxer::create_pat(SimpleBuffer *sb, uint8_t cc)
     sb->write_string(stuff);
 }
 
-void MpegTsMuxer::create_pmt(SimpleBuffer *sb, std::map<uint8_t, int> stream_pid_map, uint8_t cc)
+void MpegTsMuxer::create_pmt(SimpleBuffer *sb, std::map<uint8_t, int> stream_pid_map, uint16_t pmt_pid, uint8_t cc)
 {
     int pos = sb->pos();
     TsHeader ts_header;
@@ -88,7 +88,7 @@ void MpegTsMuxer::create_pmt(SimpleBuffer *sb, std::map<uint8_t, int> stream_pid
     ts_header.transport_error_indicator = 0;
     ts_header.payload_unit_start_indicator = 1;
     ts_header.transport_priority = 0;
-    ts_header.pid = MPEGTS_PMT_PID;
+    ts_header.pid = pmt_pid;
     ts_header.transport_scrambling_control = 0;
     ts_header.adaptation_field_control = MpegTsAdaptationFieldType::payload_only;
     ts_header.continuity_counter = cc;
@@ -262,12 +262,12 @@ void MpegTsMuxer::create_null(SimpleBuffer *sb)
     ts_header.encode(sb);
 }
 
-void MpegTsMuxer::encode(TsFrame *frame, std::map<uint8_t, int> stream_pid_map, SimpleBuffer *sb)
+void MpegTsMuxer::encode(TsFrame *frame, std::map<uint8_t, int> stream_pid_map, uint16_t pmt_pid, SimpleBuffer *sb)
 {
     if (should_create_pat()) {
         uint8_t pat_pmt_cc = get_cc(0);
-        create_pat(sb, pat_pmt_cc);
-        create_pmt(sb, stream_pid_map, pat_pmt_cc);
+        create_pat(sb, pmt_pid, pat_pmt_cc);
+        create_pmt(sb, stream_pid_map, pmt_pid, pat_pmt_cc);
     }
 
     create_pes(frame, sb);

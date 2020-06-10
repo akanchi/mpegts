@@ -5,7 +5,7 @@
 #include "common.h"
 
 MpegTsDemuxer::MpegTsDemuxer()
-    : _pmt_id(0)
+    : pmt_id(0)
     , _pcr_id(0)
 {
 
@@ -23,7 +23,7 @@ int MpegTsDemuxer::decode(SimpleBuffer *in, TsFrame *&out)
         ts_header.decode(in);
 
         // found pat & get pmt pid
-        if (ts_header.pid == 0 && _pmt_id == 0) {
+        if (ts_header.pid == 0 && pmt_id == 0) {
             if (ts_header.adaptation_field_control == 0x02 || ts_header.adaptation_field_control == 0x03) {
                 AdaptationFieldHeader adapt_field;
                 adapt_field.decode(in);
@@ -37,13 +37,13 @@ int MpegTsDemuxer::decode(SimpleBuffer *in, TsFrame *&out)
                 PATHeader pat_header;
                 pat_header.decode(in);
                 in->read_2bytes();
-                _pmt_id = in->read_2bytes() & 0x1fff;
+                pmt_id = in->read_2bytes() & 0x1fff;
                 pat_header.print();
             }
         }
 
         // found pmt
-        if (_ts_frames.empty() && _pmt_id != 0 && ts_header.pid == _pmt_id) {
+        if (_ts_frames.empty() && pmt_id != 0 && ts_header.pid == pmt_id) {
             if (ts_header.adaptation_field_control == 0x02 || ts_header.adaptation_field_control == 0x03) {
                 AdaptationFieldHeader adapt_field;
                 adapt_field.decode(in);

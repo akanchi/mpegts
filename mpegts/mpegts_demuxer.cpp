@@ -42,7 +42,9 @@ int MpegTsDemuxer::decode(SimpleBuffer *in, TsFrame *&out)
 
                 pmt_id = in->read_2bytes() & 0x1fff;
                 patIsValid = true;
-                //pat_header.print();
+#ifdef DEBUG
+                pat_header.print();
+#endif
             }
         }
 
@@ -64,7 +66,9 @@ int MpegTsDemuxer::decode(SimpleBuffer *in, TsFrame *&out)
                     stream_pid_map[pmt_header.infos[i]->stream_type] = pmt_header.infos[i]->elementary_PID;
                 }
                 pmtIsValid = true;
-                //pmt_header.print();
+#ifdef DEBUG
+                pmt_header.print();
+#endif
             }
         }
 

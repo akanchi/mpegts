@@ -18,7 +18,7 @@ ExternalProject_Add(project_amf0
         INSTALL_COMMAND ""
         )
 
-#include_directories(${CMAKE_CURRENT_SOURCE_DIR}/amf0/amf0/)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/mpegts/)
 
 file(GLOB libfiles "${CMAKE_CURRENT_SOURCE_DIR}/mpegts/*.cpp")
 add_library(mpegts STATIC ${libfiles})

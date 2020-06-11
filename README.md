@@ -1,6 +1,14 @@
 # MPEG-TS
 A simple C++ implementation of a MPEG-TS Muxer and Demuxer
 
+**Build status ->**
+
+![Ubuntu 18.04](https://github.com/andersc/mpegts/workflows/Ubuntu%2018.04/badge.svg)
+
+![Windows](https://github.com/andersc/mpegts/workflows/Windows/badge.svg)
+
+![MacOS](https://github.com/andersc/mpegts/workflows/MacOS/badge.svg)
+
 
 # Build
 

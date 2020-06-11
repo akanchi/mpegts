@@ -4,7 +4,7 @@
 #include "common.h"
 
 MpegTsDemuxer::MpegTsDemuxer()
-    : _pmt_id(0)
+    : pmt_id(0)
     , _pcr_id(0)
 {
 
@@ -16,13 +16,16 @@ MpegTsDemuxer::~MpegTsDemuxer()
 
 int MpegTsDemuxer::decode(SimpleBuffer *in, TsFrame *&out)
 {
+
+    bool g = in->empty();
+
     while (!in->empty()) {
         int pos = in->pos();
         TsHeader ts_header;
         ts_header.decode(in);
 
         // found pat & get pmt pid
-        if (ts_header.pid == 0 && _pmt_id == 0) {
+        if (ts_header.pid == 0 && pmt_id == 0) {
             if (ts_header.adaptation_field_control == 0x02 || ts_header.adaptation_field_control == 0x03) {
                 AdaptationFieldHeader adapt_field;
                 adapt_field.decode(in);
@@ -36,14 +39,15 @@ int MpegTsDemuxer::decode(SimpleBuffer *in, TsFrame *&out)
 
                 pat_header.decode(in);
                 in->read_2bytes();
-                _pmt_id = in->read_2bytes() & 0x1fff;
+
+                pmt_id = in->read_2bytes() & 0x1fff;
                 patIsValid = true;
                 //pat_header.print();
             }
         }
 
         // found pmt
-        if (_ts_frames.empty() && _pmt_id != 0 && ts_header.pid == _pmt_id) {
+        if (_ts_frames.empty() && pmt_id != 0 && ts_header.pid == pmt_id) {
             if (ts_header.adaptation_field_control == 0x02 || ts_header.adaptation_field_control == 0x03) {
                 AdaptationFieldHeader adapt_field;
                 adapt_field.decode(in);
@@ -96,6 +100,7 @@ int MpegTsDemuxer::decode(SimpleBuffer *in, TsFrame *&out)
 
                     pes_header.decode(in);
                     _ts_frames[ts_header.pid]->stream_id = pes_header.stream_id;
+                    _ts_frames[ts_header.pid]->expected_pes_packet_length = pes_header.pes_packet_length;
                     if (pes_header.pts_dts_flags == 0x02) {
                         _ts_frames[ts_header.pid]->pts = _ts_frames[ts_header.pid]->dts = read_pts(in);
                     } else if (pes_header.pts_dts_flags == 0x03) {
@@ -112,7 +117,13 @@ int MpegTsDemuxer::decode(SimpleBuffer *in, TsFrame *&out)
                         break;
                     }
                 }
-                _ts_frames[ts_header.pid]->_data->append(in->data() + in->pos(), 188 - in->pos() - pos);
+                
+                if(_ts_frames[ts_header.pid]->expected_pes_packet_length != 0 && _ts_frames[ts_header.pid]->_data->size() + 188 - in->pos() - pos > _ts_frames[ts_header.pid]->expected_pes_packet_length) {
+                    _ts_frames[ts_header.pid]->_data->append(in->data() + in->pos(), _ts_frames[ts_header.pid]->expected_pes_packet_length - _ts_frames[ts_header.pid]->_data->size());
+                } else {
+                    _ts_frames[ts_header.pid]->_data->append(in->data() + in->pos(), 188 - in->pos() - pos);
+                }
+                
             }
         } else if (_pcr_id != 0 && _pcr_id == ts_header.pid) {
             AdaptationFieldHeader adapt_field;

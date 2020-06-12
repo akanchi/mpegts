@@ -44,8 +44,8 @@ public:
     std::string to_string();
 
 private:
-    std::vector<char> _data;
-    int _pos;
+    std::vector<char> mData;
+    int mPos;
 };
 
 #endif /* __SIMPLE_BUFFER_H__ */

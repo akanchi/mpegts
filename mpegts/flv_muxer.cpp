@@ -9,24 +9,21 @@
 
 static const int FLV_TAG_HEADER_SIZE = 11;
 
-class FLVTagType
-{
+class FLVTagType {
 public:
     static const uint8_t mAudio = 8;
     static const uint8_t mVideo = 9;
     static const uint8_t mScriptData = 18;
 };
 
-class NALU
-{
+class NALU {
 public:
     int mType;
     uint32_t mSize;
     char *mpData;
 };
 
-inline int getNalu(NALU &rNalu, char *pData, uint32_t lSize, uint32_t lIndex)
-{
+inline int getNalu(NALU &rNalu, char *pData, uint32_t lSize, uint32_t lIndex) {
     rNalu.mType = 0;
     int lRet = -1;
     uint32_t lI = lIndex;
@@ -68,32 +65,27 @@ inline int getNalu(NALU &rNalu, char *pData, uint32_t lSize, uint32_t lIndex)
 }
 
 FLVMuxer::FLVMuxer()
-    : mHasSetStartPts(false)
-    , mStartPts(0)
-    , mDuration(0)
-{
+        : mHasSetStartPts(false), mStartPts(0), mDuration(0) {
 
 }
 
-FLVMuxer::~FLVMuxer()
-{
+FLVMuxer::~FLVMuxer() {
 
 }
 
-int FLVMuxer::writeHeader(SimpleBuffer *pSb)
-{
+int FLVMuxer::writeHeader(SimpleBuffer *pSb) {
     pSb->write_1byte('F');   // Signature
     pSb->write_1byte('L');
     pSb->write_1byte('V');
     pSb->write_1byte(0x01);  // version
     pSb->write_1byte(0x05);  // Audio and Video tags are present
-    pSb->write_4bytes(0x00000009);   // DataOffset, Offset in bytes from start of file to start of body (that is, size of header)
+    pSb->write_4bytes(
+            0x00000009);   // DataOffset, Offset in bytes from start of file to start of body (that is, size of header)
     pSb->write_4bytes(0x00000000);   // PreviousTagSize0, Always 0
     return 0;
 }
 
-int FLVMuxer::writeBody(TsFrame *pFrame, SimpleBuffer *pSb)
-{
+int FLVMuxer::writeBody(TsFrame *pFrame, SimpleBuffer *pSb) {
     if (pFrame->mStreamType == MpegTsStream::AAC) {
         writeAacTag(pFrame, pSb);
     } else if (pFrame->mStreamType == MpegTsStream::AVC) {
@@ -105,8 +97,7 @@ int FLVMuxer::writeBody(TsFrame *pFrame, SimpleBuffer *pSb)
     return 0;
 }
 
-int FLVMuxer::writeAacTag(TsFrame *pFrame, SimpleBuffer *pSb)
-{
+int FLVMuxer::writeAacTag(TsFrame *pFrame, SimpleBuffer *pSb) {
     uint32_t lBodySize = 2 + pFrame->mData->size();
     uint32_t lPts = pFrame->mPts / 90;
     pSb->write_1byte(FLVTagType::mAudio);
@@ -122,8 +113,7 @@ int FLVMuxer::writeAacTag(TsFrame *pFrame, SimpleBuffer *pSb)
     return 0;
 }
 
-int FLVMuxer::writeAvcTag(TsFrame *pFrame, SimpleBuffer *pSb)
-{
+int FLVMuxer::writeAvcTag(TsFrame *pFrame, SimpleBuffer *pSb) {
     int lIndex = 0;
     uint32_t lPts = pFrame->mPts / 90;
     uint32_t lDts = pFrame->mDts / 90;
@@ -184,8 +174,7 @@ int FLVMuxer::writeAvcTag(TsFrame *pFrame, SimpleBuffer *pSb)
     return 0;
 }
 
-void FLVMuxer::calcDuration(uint32_t lPts)
-{
+void FLVMuxer::calcDuration(uint32_t lPts) {
     if (!mHasSetStartPts) {
         mHasSetStartPts = true;
         mStartPts = lPts;
@@ -194,8 +183,7 @@ void FLVMuxer::calcDuration(uint32_t lPts)
     mDuration = lPts - mStartPts;
 }
 
-int FLVMuxer::writeMetadata(SimpleBuffer *pSb, uint32_t lFileSize)
-{
+int FLVMuxer::writeMetadata(SimpleBuffer *pSb, uint32_t lFileSize) {
     SimpleBuffer lBodySb;
 
     Amf0String lAmfOnMetaData("onMetaData");

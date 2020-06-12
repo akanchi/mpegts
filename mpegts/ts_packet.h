@@ -13,22 +13,23 @@
 
 class SimpleBuffer;
 
-class MpegTsStream
-{
+class MpegTsStream {
 public:
     static const uint8_t AAC = 0x0f;
     static const uint8_t AVC = 0x1b;
 };
 
-class TsFrame
-{
+class TsFrame {
 public:
     TsFrame();
+
     TsFrame(uint8_t lSt);
-    virtual ~TsFrame(){};
+
+    virtual ~TsFrame() {};
 
 public:
     bool empty();
+
     void reset();
 
 public:
@@ -43,14 +44,15 @@ public:
     bool mCompleted;
 };
 
-class TsHeader
-{
+class TsHeader {
 public:
     TsHeader();
+
     virtual ~TsHeader();
 
 public:
     void encode(SimpleBuffer *sb);
+
     void decode(SimpleBuffer *pSb);
 
 public:
@@ -64,15 +66,17 @@ public:
     uint8_t mContinuityCounter;             // 4 bits
 };
 
-class PATHeader
-{
+class PATHeader {
 public:
     PATHeader();
+
     virtual ~PATHeader();
 
 public:
     void encode(SimpleBuffer *pSb);
+
     void decode(SimpleBuffer *pSb);
+
     void print();
 
 public:
@@ -89,17 +93,21 @@ public:
     uint8_t mLastSectionNumber;            // 8 bits
 };
 
-class PMTElementInfo
-{
+class PMTElementInfo {
 public:
     PMTElementInfo();
+
     PMTElementInfo(uint8_t lSt, uint16_t lPid);
+
     virtual ~PMTElementInfo();
 
 public:
     void encode(SimpleBuffer *pSb);
+
     void decode(SimpleBuffer *sb);
+
     uint16_t size();
+
     void print();
 
 public:
@@ -111,16 +119,19 @@ public:
     std::string mEsInfo;
 };
 
-class PMTHeader
-{
+class PMTHeader {
 public:
     PMTHeader();
+
     virtual ~PMTHeader();
 
 public:
     void encode(SimpleBuffer *pSb);
+
     void decode(SimpleBuffer *pSb);
+
     uint16_t size();
+
     void print();
 
 public:
@@ -142,14 +153,15 @@ public:
     std::vector<std::shared_ptr<PMTElementInfo>> mInfos;
 };
 
-class AdaptationFieldHeader
-{
+class AdaptationFieldHeader {
 public:
     AdaptationFieldHeader();
+
     virtual ~AdaptationFieldHeader();
 
 public:
     void encode(SimpleBuffer *pSb);
+
     void decode(SimpleBuffer *pAb);
 
 public:
@@ -164,14 +176,15 @@ public:
     uint8_t mSiscontinuityIndicator;                // 1 bit
 };
 
-class PESHeader
-{
+class PESHeader {
 public:
     PESHeader();
+
     virtual ~PESHeader();
 
 public:
     void encode(SimpleBuffer *pSb);
+
     void decode(SimpleBuffer *pSb);
 
 public:

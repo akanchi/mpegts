@@ -14,20 +14,24 @@
 
 class TsFrame;
 
-class FLVMuxer
-{
+class FLVMuxer {
 public:
     FLVMuxer();
+
     virtual ~FLVMuxer();
 
 public:
     int writeHeader(SimpleBuffer *pSb);
+
     int writeBody(TsFrame *pFrame, SimpleBuffer *pSb);
+
     int writeMetadata(SimpleBuffer *pSb, uint32_t lFileSize);
 
 private:
     int writeAacTag(TsFrame *pFrame, SimpleBuffer *pSb);
+
     int writeAvcTag(TsFrame *pFrame, SimpleBuffer *pSb);
+
     void calcDuration(uint32_t lPts);
 
 private:

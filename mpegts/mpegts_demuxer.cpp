@@ -4,18 +4,14 @@
 #include "common.h"
 
 MpegTsDemuxer::MpegTsDemuxer()
-    : mPmtId(0)
-    , mPcrId(0)
-{
+        : mPmtId(0), mPcrId(0) {
 
 }
 
-MpegTsDemuxer::~MpegTsDemuxer()
-{
+MpegTsDemuxer::~MpegTsDemuxer() {
 }
 
-int MpegTsDemuxer::decode(SimpleBuffer *pIn, TsFrame *&prOut)
-{
+int MpegTsDemuxer::decode(SimpleBuffer *pIn, TsFrame *&prOut) {
 
     bool g = pIn->empty();
 
@@ -62,7 +58,8 @@ int MpegTsDemuxer::decode(SimpleBuffer *pIn, TsFrame *&prOut)
                 mPmtHeader.decode(pIn);
                 mPcrId = mPmtHeader.mPcrPid;
                 for (size_t lI = 0; lI < mPmtHeader.mInfos.size(); lI++) {
-                    mTsFrames[mPmtHeader.mInfos[lI]->mElementaryPid] = std::shared_ptr<TsFrame>(new TsFrame(mPmtHeader.mInfos[lI]->mStreamType));
+                    mTsFrames[mPmtHeader.mInfos[lI]->mElementaryPid] = std::shared_ptr<TsFrame>(
+                            new TsFrame(mPmtHeader.mInfos[lI]->mStreamType));
                     mStreamPidMap[mPmtHeader.mInfos[lI]->mStreamType] = mPmtHeader.mInfos[lI]->mElementaryPid;
                 }
                 mPmtIsValid = true;
@@ -112,22 +109,29 @@ int MpegTsDemuxer::decode(SimpleBuffer *pIn, TsFrame *&prOut)
                         mTsFrames[lTsHeader.mPid]->mDts = readPts(pIn);
                     }
                     if (lPesHeader.mPesPacketLength != 0x0000) {
-                        if ((lPesHeader.mPesPacketLength - 3 - lPesHeader.mHeaderDataLength) >= 188 || (lPesHeader.mPesPacketLength - 3 - lPesHeader.mHeaderDataLength) < 0) {
+                        if ((lPesHeader.mPesPacketLength - 3 - lPesHeader.mHeaderDataLength) >= 188 ||
+                            (lPesHeader.mPesPacketLength - 3 - lPesHeader.mHeaderDataLength) < 0) {
                             mTsFrames[lTsHeader.mPid]->mData->append(pIn->data() + pIn->pos(), 188 - pIn->pos() - lPos);
                         } else {
-                            mTsFrames[lTsHeader.mPid]->mData->append(pIn->data() + pIn->pos(), lPesHeader.mPesPacketLength - 3 - lPesHeader.mHeaderDataLength);
+                            mTsFrames[lTsHeader.mPid]->mData->append(pIn->data() + pIn->pos(),
+                                                                     lPesHeader.mPesPacketLength - 3 -
+                                                                     lPesHeader.mHeaderDataLength);
                         }
-                        
+
                         break;
                     }
                 }
-                
-                if(mTsFrames[lTsHeader.mPid]->mExpectedPesPacketLength != 0 && mTsFrames[lTsHeader.mPid]->mData->size() + 188 - pIn->pos() - lPos > mTsFrames[lTsHeader.mPid]->mExpectedPesPacketLength) {
-                    mTsFrames[lTsHeader.mPid]->mData->append(pIn->data() + pIn->pos(), mTsFrames[lTsHeader.mPid]->mExpectedPesPacketLength - mTsFrames[lTsHeader.mPid]->mData->size());
+
+                if (mTsFrames[lTsHeader.mPid]->mExpectedPesPacketLength != 0 &&
+                    mTsFrames[lTsHeader.mPid]->mData->size() + 188 - pIn->pos() - lPos >
+                    mTsFrames[lTsHeader.mPid]->mExpectedPesPacketLength) {
+                    mTsFrames[lTsHeader.mPid]->mData->append(pIn->data() + pIn->pos(),
+                                                             mTsFrames[lTsHeader.mPid]->mExpectedPesPacketLength -
+                                                             mTsFrames[lTsHeader.mPid]->mData->size());
                 } else {
                     mTsFrames[lTsHeader.mPid]->mData->append(pIn->data() + pIn->pos(), 188 - pIn->pos() - lPos);
                 }
-                
+
             }
         } else if (mPcrId != 0 && mPcrId == lTsHeader.mPid) {
             AdaptationFieldHeader lAdaptField;

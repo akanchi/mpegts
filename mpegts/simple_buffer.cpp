@@ -4,102 +4,102 @@
 //#include <algorithm>
 #include <iterator>
 
-SimpleBuffer::SimpleBuffer(int size, char val)
+SimpleBuffer::SimpleBuffer(int lSize, char lVal)
     : mPos(0)
 {
-    if (size > 0)
-        mData = std::vector<char>(size, val);
+    if (lSize > 0)
+        mData = std::vector<char>(lSize, lVal);
 }
 
 SimpleBuffer::~SimpleBuffer()
 {
 }
 
-void SimpleBuffer::write_1byte(int8_t val)
+void SimpleBuffer::write_1byte(int8_t lVal)
 {
     if (mPos < size()) {
-        mData[mPos] = val;
+        mData[mPos] = lVal;
     } else {
-        mData.push_back(val);
+        mData.push_back(lVal);
     }
     
     mPos += 1;
 }
 
-void SimpleBuffer::write_2bytes(int16_t val)
+void SimpleBuffer::write_2bytes(int16_t lVal)
 {
-    char *p = (char *)&val;
+    char *p = (char *)&lVal;
 
     for (int i = 1; i >= 0; --i) {
         write_1byte(p[i]);
     }
 }
 
-void SimpleBuffer::write_3bytes(int32_t val)
+void SimpleBuffer::write_3bytes(int32_t lVal)
 {
-    char *p = (char *)&val;
+    char *p = (char *)&lVal;
 
     for (int i = 2; i >= 0; --i) {
         write_1byte(p[i]);
     }
 }
 
-void SimpleBuffer::write_4bytes(int32_t val)
+void SimpleBuffer::write_4bytes(int32_t lVal)
 {
-    char *p = (char *)&val;
+    char *p = (char *)&lVal;
 
     for (int i = 3; i >= 0; --i) {
         write_1byte(p[i]);
     }
 }
 
-void SimpleBuffer::write_8bytes(int64_t val)
+void SimpleBuffer::write_8bytes(int64_t lVal)
 {
-    char *p = (char *)&val;
+    char *p = (char *)&lVal;
 
     for (int i = 7; i >= 0; --i) {
         write_1byte(p[i]);
     }
 }
 
-void SimpleBuffer::write_string(std::string val)
+void SimpleBuffer::write_string(std::string lVal)
 {
-    for (const char &c : val) {
-        write_1byte(c);
+    for (const char &rC : lVal) {
+        write_1byte(rC);
     }
 }
 
-void SimpleBuffer::append(const char* bytes, int size)
+void SimpleBuffer::append(const char* pBytes, int lSize)
 {
-    if (size <= 0)
+    if (lSize <= 0)
         return;
 
-    mData.insert(mData.end(), bytes, bytes + size);
+    mData.insert(mData.end(), pBytes, pBytes + lSize);
 }
 
 int8_t SimpleBuffer::read_1byte()
 {
     assert(require(1));
 
-    int8_t val = mData.at(0 + mPos);
+    int8_t lVal = mData.at(0 + mPos);
     mPos++;
 
-    return val;
+    return lVal;
 }
 
 int16_t SimpleBuffer::read_2bytes()
 {
     assert(require(2));
 
-    int16_t val = 0;
-    char *p = (char *)&val;
+    int16_t lVal = 0;
+    char *p = (char *)&lVal;
 
-    for (int i = 1; i >= 0; --i) {
-        p[i] = mData.at(0 + mPos);
+    for (int lI = 1; lI >= 0; --lI) {
+        p[lI] = mData.at(0 + mPos);
         mPos++;
     }
 
-    return val;
+    return lVal;
 }
 
 int32_t SimpleBuffer::read_3bytes()
@@ -109,8 +109,8 @@ int32_t SimpleBuffer::read_3bytes()
     int32_t val = 0;
     char *p = (char *)&val;
 
-    for (int i = 2; i >= 0; --i) {
-        p[i] = mData.at(0 + mPos);
+    for (int lI = 2; lI >= 0; --lI) {
+        p[lI] = mData.at(0 + mPos);
         mPos++;
     }
 
@@ -121,66 +121,66 @@ int32_t SimpleBuffer::read_4bytes()
 {
     assert(require(4));
 
-    int32_t val = 0;
-    char *p = (char *)&val;
+    int32_t lVal = 0;
+    char *p = (char *)&lVal;
 
-    for (int i = 3; i >= 0; --i) {
-        p[i] = mData.at(0 + mPos);
+    for (int lI = 3; lI >= 0; --lI) {
+        p[lI] = mData.at(0 + mPos);
         mPos++;
     }
 
-    return val;
+    return lVal;
 }
 
 int64_t SimpleBuffer::read_8bytes()
 {
     assert(require(8));
 
-    int64_t val = 0;
-    char *p = (char *)&val;
+    int64_t lVal = 0;
+    char *p = (char *)&lVal;
 
-    for (int i = 7; i >= 0; --i) {
-        p[i] = mData.at(0 + mPos);
+    for (int lI = 7; lI >= 0; --lI) {
+        p[lI] = mData.at(0 + mPos);
         mPos++;
     }
 
-    return val;
+    return lVal;
 }
 
-int64_t SimpleBuffer::read_nbytes(int n)
+int64_t SimpleBuffer::read_nbytes(int lN)
 {
-    assert(require(n));
+    assert(require(lN));
 
-    int64_t val = 0;
-    char *p = (char *)&val;
-    for (int i = n; i >= 0; --i) {
-        p[i] = mData.at(0 + mPos);
+    int64_t lVal = 0;
+    char *p = (char *)&lVal;
+    for (int lI = lN; lI >= 0; --lI) {
+        p[lI] = mData.at(0 + mPos);
         mPos++;
     }
 
-    return val;
+    return lVal;
 }
 
-std::string SimpleBuffer::read_string(int len)
+std::string SimpleBuffer::read_string(int lLen)
 {
-    assert(require(len));
+    assert(require(lLen));
 
-    std::string val(&mData[0] + mPos, len);
-    mPos += len;
+    std::string lVal(&mData[0] + mPos, lLen);
+    mPos += lLen;
 
-    return val;
+    return lVal;
 }
 
-void SimpleBuffer::skip(int size)
+void SimpleBuffer::skip(int lSize)
 {
-    mPos += size;
+    mPos += lSize;
 }
 
-bool SimpleBuffer::require(int required_size)
+bool SimpleBuffer::require(int lRequiredSize)
 {
-    assert(required_size >= 0);
+    assert(lRequiredSize >= 0);
 
-    return required_size <= (int)mData.size() - mPos;
+    return lRequiredSize <= (int)mData.size() - mPos;
 }
 
 bool SimpleBuffer::empty()
@@ -203,38 +203,38 @@ char *SimpleBuffer::data()
     return (size() == 0) ? nullptr : &mData[0];
 }
 
-void SimpleBuffer::erase(int size)
+void SimpleBuffer::erase(int lSize)
 {
-    if (size <= 0)
+    if (lSize <= 0)
     {
         return;
     }
 
     mPos = 0;
-    if (size >= this->size())
+    if (lSize >= this->size())
     {
         mData.clear();
         return;
     }
 
-    mData.erase(mData.begin(), mData.begin() + size);
+    mData.erase(mData.begin(), mData.begin() + lSize);
 }
 
-void SimpleBuffer::set_data(int pos, char *data, int len)
+void SimpleBuffer::setData(int lPos, char *pData, int lLen)
 {
-    if (!data)
+    if (!pData)
         return;
     
-    if (pos + len > size()) {
+    if (lPos + lLen > size()) {
         return;
     }
 
-    for (int i = 0; i < len; i++) {
-        mData[pos + i] = data[i];
+    for (int lI = 0; lI < lLen; lI++) {
+        mData[lPos + lI] = pData[lI];
     }
 }
 
-std::string SimpleBuffer::to_string()
+std::string SimpleBuffer::toString()
 {
     return std::string(mData.begin(), mData.end());
 }

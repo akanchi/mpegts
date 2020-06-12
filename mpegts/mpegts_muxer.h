@@ -1,5 +1,11 @@
 #pragma once
 
+// Prefixes used
+// m class member
+// p pointer (*)
+// r reference (&)
+// l local scope
+
 #include <map>
 #include <stdint.h>
 
@@ -13,18 +19,18 @@ public:
     virtual ~MpegTsMuxer();
 
 public:
-    void create_pat(SimpleBuffer *sb, uint16_t pmt_pid, uint8_t cc);
-    void create_pmt(SimpleBuffer *sb, std::map<uint8_t, int> stream_pid_map, uint16_t pmt_pid, uint8_t cc);
-    void create_pes(TsFrame *frame, SimpleBuffer *sb);
-    void create_pcr(SimpleBuffer *sb);
-    void create_null(SimpleBuffer *sb);
-    void encode(TsFrame *frame, std::map<uint8_t, int> stream_pid_map, uint16_t pmt_pid, SimpleBuffer *sb);
+    void createPat(SimpleBuffer *pSb, uint16_t lPmtPid, uint8_t lCc);
+    void createPmt(SimpleBuffer *pSb, std::map<uint8_t, int> lStreamPidMap, uint16_t lPmtPid, uint8_t lCc);
+    void createPes(TsFrame *pFrame, SimpleBuffer *pSb);
+    void createPcr(SimpleBuffer *pSb);
+    void createNull(SimpleBuffer *pSb);
+    void encode(TsFrame *pFrame, std::map<uint8_t, int> lStreamPidMap, uint16_t lPmtPid, SimpleBuffer *pSb);
 
 private:
-    uint8_t get_cc(uint32_t with_pid);
-    bool should_create_pat();
+    uint8_t getCc(uint32_t lWithPid);
+    bool shouldCreatePat();
 
 private:
-    std::map<uint32_t, uint8_t> _pid_cc_map; 
+    std::map<uint32_t, uint8_t> mPidCcMap;
 };
 

@@ -14,13 +14,13 @@ class MpegTsAdaptationFieldType
 {
 public:
     // Reserved for future use by ISO/IEC
-    static const uint8_t reserved = 0x00;
+    static const uint8_t mReserved = 0x00;
     // No adaptation_field, payload only
-    static const uint8_t payload_only = 0x01;
+    static const uint8_t mPayloadOnly = 0x01;
     // Adaptation_field only, no payload
-    static const uint8_t adaption_only = 0x02;
+    static const uint8_t mAdaptionOnly = 0x02;
     // Adaptation_field followed by payload
-    static const uint8_t payload_adaption_both = 0x03;
+    static const uint8_t mPayloadAdaptionBoth = 0x03;
 };
 
 MpegTsMuxer::MpegTsMuxer()
@@ -31,272 +31,272 @@ MpegTsMuxer::~MpegTsMuxer()
 {
 }
 
-void MpegTsMuxer::create_pat(SimpleBuffer *sb, uint16_t pmt_pid, uint8_t cc)
+void MpegTsMuxer::createPat(SimpleBuffer *pSb, uint16_t lPmtPid, uint8_t lCc)
 {
-    int pos = sb->pos();
-    TsHeader ts_header;
-    ts_header.sync_byte = 0x47;
-    ts_header.transport_error_indicator = 0;
-    ts_header.payload_unit_start_indicator = 1;
-    ts_header.transport_priority = 0;
-    ts_header.pid = MPEGTS_PAT_PID;
-    ts_header.transport_scrambling_control = 0;
-    ts_header.adaptation_field_control = MpegTsAdaptationFieldType::payload_only;
-    ts_header.continuity_counter = cc;
+    int lPos = pSb->pos();
+    TsHeader lTsHeader;
+    lTsHeader.mSyncByte = 0x47;
+    lTsHeader.mTransportErrorIndicator = 0;
+    lTsHeader.mPayloadUnitStartIndicator = 1;
+    lTsHeader.mTransportPriority = 0;
+    lTsHeader.mPid = MPEGTS_PAT_PID;
+    lTsHeader.mTransportScramblingControl = 0;
+    lTsHeader.mAdaptationFieldControl = MpegTsAdaptationFieldType::mPayloadOnly;
+    lTsHeader.mContinuityCounter = lCc;
 
-    AdaptationFieldHeader adapt_field;
+    AdaptationFieldHeader lAdaptField;
 
-    PATHeader pat_header;
-    pat_header.table_id = 0x00;
-    pat_header.section_syntax_indicator = 1;
-    pat_header.b0 = 0;
-    pat_header.reserved0 = 0x3;
-    pat_header.transport_stream_id = 0;
-    pat_header.reserved1 = 0x3;
-    pat_header.version_number = 0;
-    pat_header.current_next_indicator = 1;
-    pat_header.section_number = 0x0;
-    pat_header.last_section_number = 0x0;
+    PATHeader lPatHeader;
+    lPatHeader.mTableId = 0x00;
+    lPatHeader.mSectionSyntaxIndicator = 1;
+    lPatHeader.mB0 = 0;
+    lPatHeader.mReserved0 = 0x3;
+    lPatHeader.mTransportStreamId = 0;
+    lPatHeader.mReserved1 = 0x3;
+    lPatHeader.mVersionNumber = 0;
+    lPatHeader.mCurrentNextIndicator = 1;
+    lPatHeader.mSectionNumber = 0x0;
+    lPatHeader.mLastSectionNumber = 0x0;
 
     //program_number
-    uint16_t program_number = 0x0001;
+    uint16_t lProgramNumber = 0x0001;
     //program_map_PID
-    uint16_t program_map_PID = 0xe000 | (pmt_pid & 0x1fff);
+    uint16_t lProgramMapPid = 0xe000 | (lPmtPid & 0x1fff);
 
-    unsigned int section_length = 4 + 4 + 5;
-    pat_header.section_length = section_length & 0x3ff;
+    unsigned int lSectionLength = 4 + 4 + 5;
+    lPatHeader.mSectionLength = lSectionLength & 0x3ff;
 
-    ts_header.encode(sb);
-    adapt_field.encode(sb);
-    pat_header.encode(sb);
-    sb->write_2bytes(program_number);
-    sb->write_2bytes(program_map_PID);
+    lTsHeader.encode(pSb);
+    lAdaptField.encode(pSb);
+    lPatHeader.encode(pSb);
+    pSb->write_2bytes(lProgramNumber);
+    pSb->write_2bytes(lProgramMapPid);
 
     // crc32
-    uint32_t crc_32 = crc32((uint8_t *)sb->data() + 5, sb->pos() - 5);
-    sb->write_4bytes(crc_32);
+    uint32_t lCrc32 = crc32((uint8_t *)pSb->data() + 5, pSb->pos() - 5);
+    pSb->write_4bytes(lCrc32);
 
-    std::string stuff(188 - (sb->pos() - pos), 0xff);
-    sb->write_string(stuff);
+    std::string lStuff(188 - (pSb->pos() - lPos), 0xff);
+    pSb->write_string(lStuff);
 }
 
-void MpegTsMuxer::create_pmt(SimpleBuffer *sb, std::map<uint8_t, int> stream_pid_map, uint16_t pmt_pid, uint8_t cc)
+void MpegTsMuxer::createPmt(SimpleBuffer *pSb, std::map<uint8_t, int> lStreamPidMap, uint16_t lPmtPid, uint8_t lCc)
 {
-    int pos = sb->pos();
-    TsHeader ts_header;
-    ts_header.sync_byte = 0x47;
-    ts_header.transport_error_indicator = 0;
-    ts_header.payload_unit_start_indicator = 1;
-    ts_header.transport_priority = 0;
-    ts_header.pid = pmt_pid;
-    ts_header.transport_scrambling_control = 0;
-    ts_header.adaptation_field_control = MpegTsAdaptationFieldType::payload_only;
-    ts_header.continuity_counter = cc;
+    int lPos = pSb->pos();
+    TsHeader lTsHeader;
+    lTsHeader.mSyncByte = 0x47;
+    lTsHeader.mTransportErrorIndicator = 0;
+    lTsHeader.mPayloadUnitStartIndicator = 1;
+    lTsHeader.mTransportPriority = 0;
+    lTsHeader.mPid = lPmtPid;
+    lTsHeader.mTransportScramblingControl = 0;
+    lTsHeader.mAdaptationFieldControl = MpegTsAdaptationFieldType::mPayloadOnly;
+    lTsHeader.mContinuityCounter = lCc;
 
-    AdaptationFieldHeader adapt_field;
+    AdaptationFieldHeader lAdaptField;
 
-    PMTHeader pmt_header;
-    pmt_header.table_id = 0x02;
-    pmt_header.section_syntax_indicator = 1;
-    pmt_header.b0 = 0;
-    pmt_header.reserved0 = 0x3;
-    pmt_header.section_length = 0;
-    pmt_header.program_number = 0x0001;
-    pmt_header.reserved1 = 0x3;
-    pmt_header.version_number = 0;
-    pmt_header.current_next_indicator = 1;
-    pmt_header.section_number = 0x00;
-    pmt_header.last_section_number = 0x00;
-    pmt_header.reserved2 = 0x7;
-    pmt_header.reserved3 = 0xf;
-    pmt_header.program_info_length = 0;
-    for (auto it = stream_pid_map.begin(); it != stream_pid_map.end(); it++) {
-        pmt_header.infos.push_back(std::shared_ptr<PMTElementInfo>(new PMTElementInfo(it->first, it->second)));
-        if (it->first == MpegTsStream::AVC) {
-            pmt_header.PCR_PID = it->second;
+    PMTHeader lPmtHeader;
+    lPmtHeader.mTableId = 0x02;
+    lPmtHeader.mSectionSyntaxIndicator = 1;
+    lPmtHeader.mB0 = 0;
+    lPmtHeader.mReserved0 = 0x3;
+    lPmtHeader.mSectionLength = 0;
+    lPmtHeader.mProgramNumber = 0x0001;
+    lPmtHeader.mReserved1 = 0x3;
+    lPmtHeader.mVersionNumber = 0;
+    lPmtHeader.mCurrentNextIndicator = 1;
+    lPmtHeader.mSectionNumber = 0x00;
+    lPmtHeader.mLastSectionNumber = 0x00;
+    lPmtHeader.mReserved2 = 0x7;
+    lPmtHeader.mReserved3 = 0xf;
+    lPmtHeader.mProgramInfoLength = 0;
+    for (auto lIt = lStreamPidMap.begin(); lIt != lStreamPidMap.end(); lIt++) {
+        lPmtHeader.mInfos.push_back(std::shared_ptr<PMTElementInfo>(new PMTElementInfo(lIt->first, lIt->second)));
+        if (lIt->first == MpegTsStream::AVC) {
+            lPmtHeader.mPcrPid = lIt->second;
         }
     }
 
-    uint16_t section_length = pmt_header.size() - 3 + 4;
-    pmt_header.section_length = section_length & 0x3ff;
+    uint16_t lSectionLength = lPmtHeader.size() - 3 + 4;
+    lPmtHeader.mSectionLength = lSectionLength & 0x3ff;
 
-    ts_header.encode(sb);
-    adapt_field.encode(sb);
-    pmt_header.encode(sb);
+    lTsHeader.encode(pSb);
+    lAdaptField.encode(pSb);
+    lPmtHeader.encode(pSb);
 
     // crc32
-    uint32_t crc_32 = crc32((uint8_t *)sb->data() + pos + 5, sb->pos() - pos - 5);
-    sb->write_4bytes(crc_32);
+    uint32_t lCrc32 = crc32((uint8_t *)pSb->data() + lPos + 5, pSb->pos() - lPos - 5);
+    pSb->write_4bytes(lCrc32);
 
-    std::string stuff(188 - (sb->pos() - pos), 0xff);
-    sb->write_string(stuff);
+    std::string lStuff(188 - (pSb->pos() - lPos), 0xff);
+    pSb->write_string(lStuff);
 }
 
-void MpegTsMuxer::create_pes(TsFrame *frame, SimpleBuffer *sb)
+void MpegTsMuxer::createPes(TsFrame *pFrame, SimpleBuffer *pSb)
 {
-    bool first = true;
-    while (!frame->_data->empty()) {
-        SimpleBuffer packet(188);
+    bool lFirst = true;
+    while (!pFrame->mData->empty()) {
+        SimpleBuffer lPacket(188);
 
-        TsHeader ts_header;
-        ts_header.pid = frame->pid;
-        ts_header.adaptation_field_control = MpegTsAdaptationFieldType::payload_only;
-        ts_header.continuity_counter = get_cc(frame->stream_type);
+        TsHeader lTsHeader;
+        lTsHeader.mPid = pFrame->mPid;
+        lTsHeader.mAdaptationFieldControl = MpegTsAdaptationFieldType::mPayloadOnly;
+        lTsHeader.mContinuityCounter = getCc(pFrame->mStreamType);
 
-        if (first) {
-            ts_header.payload_unit_start_indicator = 0x01;
-            if (frame->stream_type == MpegTsStream::AVC) {
-                ts_header.adaptation_field_control |= 0x02;
+        if (lFirst) {
+            lTsHeader.mPayloadUnitStartIndicator = 0x01;
+            if (pFrame->mStreamType == MpegTsStream::AVC) {
+                lTsHeader.mAdaptationFieldControl |= 0x02;
                 AdaptationFieldHeader adapt_field_header;
-                adapt_field_header.adaptation_field_length = 0x07;
-                adapt_field_header.random_access_indicator = 0x01;
-                adapt_field_header.pcr_flag = 0x01;
+                adapt_field_header.mAdaptationFieldLength = 0x07;
+                adapt_field_header.mRandomAccessIndicator = 0x01;
+                adapt_field_header.mPcrFlag = 0x01;
 
-                ts_header.encode(&packet);
-                adapt_field_header.encode(&packet);
-                write_pcr(&packet, frame->dts);
+                lTsHeader.encode(&lPacket);
+                adapt_field_header.encode(&lPacket);
+                writePcr(&lPacket, pFrame->mDts);
             } else {
-                ts_header.encode(&packet);
+                lTsHeader.encode(&lPacket);
             }
 
-            PESHeader pes_header;
-            pes_header.packet_start_code = 0x000001;
-            pes_header.stream_id = frame->stream_id;
-            pes_header.marker_bits = 0x02;
-            pes_header.original_or_copy = 0x01;
+            PESHeader lPesHeader;
+            lPesHeader.mPacketStartCode = 0x000001;
+            lPesHeader.mStreamId = pFrame->mStreamId;
+            lPesHeader.mMarkerBits = 0x02;
+            lPesHeader.mOriginalOrCopy = 0x01;
 
-           if (frame->pts != frame->dts) {
-               pes_header.pts_dts_flags = 0x03;
-               pes_header.header_data_length = 0x0A;
+           if (pFrame->mPts != pFrame->mDts) {
+               lPesHeader.mPtsDtsFlags = 0x03;
+               lPesHeader.mHeaderDataLength = 0x0A;
            } else {
-               pes_header.pts_dts_flags = 0x2;
-               pes_header.header_data_length = 0x05;
+               lPesHeader.mPtsDtsFlags = 0x2;
+               lPesHeader.mHeaderDataLength = 0x05;
            }
 
-            uint32_t pes_size = (pes_header.header_data_length + frame->_data->size() + 3);
-            pes_header.pes_packet_length = pes_size > 0xffff ? 0 : pes_size;
-            pes_header.encode(&packet);
+            uint32_t lPesSize = (lPesHeader.mHeaderDataLength + pFrame->mData->size() + 3);
+            lPesHeader.mPesPacketLength = lPesSize > 0xffff ? 0 : lPesSize;
+            lPesHeader.encode(&lPacket);
 
-           if (pes_header.pts_dts_flags == 0x03) {
-               write_pts(&packet, 3, frame->pts);
-               write_pts(&packet, 1, frame->dts);
+           if (lPesHeader.mPtsDtsFlags == 0x03) {
+               writePts(&lPacket, 3, pFrame->mPts);
+               writePts(&lPacket, 1, pFrame->mDts);
            } else {
-               write_pts(&packet, 2, frame->pts);
+               writePts(&lPacket, 2, pFrame->mPts);
            }
-            first = false;
+            lFirst = false;
         } else {
-            ts_header.encode(&packet);
+            lTsHeader.encode(&lPacket);
         }
 
-        uint32_t body_size = packet.size() - packet.pos();
-        uint32_t in_size = frame->_data->size() - frame->_data->pos();
-         if (body_size <= in_size) {    // MpegTsAdaptationFieldType::payload_only or MpegTsAdaptationFieldType::payload_adaption_both for AVC
-             packet.write_string(frame->_data->read_string(body_size));
+        uint32_t lBodySize = lPacket.size() - lPacket.pos();
+        uint32_t lInSize = pFrame->mData->size() - pFrame->mData->pos();
+         if (lBodySize <= lInSize) {    // MpegTsAdaptationFieldType::payload_only or MpegTsAdaptationFieldType::payload_adaption_both for AVC
+             lPacket.write_string(pFrame->mData->read_string(lBodySize));
          } else {
-             uint16_t stuff_size = body_size - in_size;
-             if (ts_header.adaptation_field_control == MpegTsAdaptationFieldType::adaption_only || ts_header.adaptation_field_control == MpegTsAdaptationFieldType::payload_adaption_both) {
-                 char *base = packet.data() + 5 + packet.data()[4];
-                 packet.set_data(base - packet.data() + stuff_size, base, packet.data() + packet.pos() - base);
-                 memset(base, 0xff, stuff_size);
-                 packet.skip(stuff_size);
-                 packet.data()[4] += stuff_size;
+             uint16_t lStuffSize = lBodySize - lInSize;
+             if (lTsHeader.mAdaptationFieldControl == MpegTsAdaptationFieldType::mAdaptionOnly || lTsHeader.mAdaptationFieldControl == MpegTsAdaptationFieldType::mPayloadAdaptionBoth) {
+                 char *lpBase = lPacket.data() + 5 + lPacket.data()[4];
+                 lPacket.setData(lpBase - lPacket.data() + lStuffSize, lpBase, lPacket.data() + lPacket.pos() - lpBase);
+                 memset(lpBase, 0xff, lStuffSize);
+                 lPacket.skip(lStuffSize);
+                 lPacket.data()[4] += lStuffSize;
              } else {
-                 // adaptation_field_control |= 0x20 == MpegTsAdaptationFieldType::payload_adaption_both
-                 packet.data()[3] |= 0x20;
-                 packet.set_data(188 - 4 - stuff_size, packet.data() + 4, packet.pos() - 4);
-                 packet.skip(stuff_size);
-                 packet.data()[4] = stuff_size - 1;
-                 if (stuff_size >= 2) {
-                    packet.data()[5] = 0;
-                    memset(&(packet.data()[6]), 0xff, stuff_size - 2);
+                 // adaptationFieldControl |= 0x20 == MpegTsAdaptationFieldType::payload_adaption_both
+                 lPacket.data()[3] |= 0x20;
+                 lPacket.setData(188 - 4 - lStuffSize, lPacket.data() + 4, lPacket.pos() - 4);
+                 lPacket.skip(lStuffSize);
+                 lPacket.data()[4] = lStuffSize - 1;
+                 if (lStuffSize >= 2) {
+                     lPacket.data()[5] = 0;
+                    memset(&(lPacket.data()[6]), 0xff, lStuffSize - 2);
                  }
              }
-             packet.write_string(frame->_data->read_string(in_size));
+             lPacket.write_string(pFrame->mData->read_string(lInSize));
          }
 
-        sb->append(packet.data(), packet.size());
+        pSb->append(lPacket.data(), lPacket.size());
     }
 }
 
-void MpegTsMuxer::create_pcr(SimpleBuffer *sb)
+void MpegTsMuxer::createPcr(SimpleBuffer *pSb)
 {
-    uint64_t pcr = 0;
-    TsHeader ts_header;
-    ts_header.sync_byte = 0x47;
-    ts_header.transport_error_indicator = 0;
-    ts_header.payload_unit_start_indicator = 0;
-    ts_header.transport_priority = 0;
-    ts_header.pid = MPEGTS_PCR_PID;
-    ts_header.transport_scrambling_control = 0;
-    ts_header.adaptation_field_control = MpegTsAdaptationFieldType::adaption_only;
-    ts_header.continuity_counter = 0;
+    uint64_t lPcr = 0;
+    TsHeader lTsHeader;
+    lTsHeader.mSyncByte = 0x47;
+    lTsHeader.mTransportErrorIndicator = 0;
+    lTsHeader.mPayloadUnitStartIndicator = 0;
+    lTsHeader.mTransportPriority = 0;
+    lTsHeader.mPid = MPEGTS_PCR_PID;
+    lTsHeader.mTransportScramblingControl = 0;
+    lTsHeader.mAdaptationFieldControl = MpegTsAdaptationFieldType::mAdaptionOnly;
+    lTsHeader.mContinuityCounter = 0;
 
-    AdaptationFieldHeader adapt_field;
-    adapt_field.adaptation_field_length = 188 - 4 - 1;
-    adapt_field.discontinuity_indicator = 0;
-    adapt_field.random_access_indicator = 0;
-    adapt_field.elementary_stream_priority_indicator = 0;
-    adapt_field.pcr_flag = 1;
-    adapt_field.opcr_flag = 0;
-    adapt_field.splicing_point_flag = 0;
-    adapt_field.transport_private_data_flag = 0;
-    adapt_field.adaptation_field_extension_flag = 0;
+    AdaptationFieldHeader lAdaptField;
+    lAdaptField.mAdaptationFieldLength = 188 - 4 - 1;
+    lAdaptField.mSiscontinuityIndicator = 0;
+    lAdaptField.mRandomAccessIndicator = 0;
+    lAdaptField.mElementaryStreamPriorityIndicator = 0;
+    lAdaptField.mPcrFlag = 1;
+    lAdaptField.mOpcrFlag = 0;
+    lAdaptField.mSplicingPointFlag = 0;
+    lAdaptField.mTransportPrivateDataFlag = 0;
+    lAdaptField.mAdaptationFieldExtensionFlag = 0;
 
-    char *p = sb->data();
-    ts_header.encode(sb);
-    adapt_field.encode(sb);
-    write_pcr(sb, pcr);
+    char *p = pSb->data();
+    lTsHeader.encode(pSb);
+    lAdaptField.encode(pSb);
+    writePcr(pSb, lPcr);
 }
 
-void MpegTsMuxer::create_null(SimpleBuffer *sb)
+void MpegTsMuxer::createNull(SimpleBuffer *pSb)
 {
-    TsHeader ts_header;
-    ts_header.sync_byte = 0x47;
-    ts_header.transport_error_indicator = 0;
-    ts_header.payload_unit_start_indicator = 0;
-    ts_header.transport_priority = 0;
-    ts_header.pid = MPEGTS_NULL_PACKET_PID;
-    ts_header.transport_scrambling_control = 0;
-    ts_header.adaptation_field_control = MpegTsAdaptationFieldType::payload_only;
-    ts_header.continuity_counter = 0;
-    ts_header.encode(sb);
+    TsHeader lTsHeader;
+    lTsHeader.mSyncByte = 0x47;
+    lTsHeader.mTransportErrorIndicator = 0;
+    lTsHeader.mPayloadUnitStartIndicator = 0;
+    lTsHeader.mTransportPriority = 0;
+    lTsHeader.mPid = MPEGTS_NULL_PACKET_PID;
+    lTsHeader.mTransportScramblingControl = 0;
+    lTsHeader.mAdaptationFieldControl = MpegTsAdaptationFieldType::mPayloadOnly;
+    lTsHeader.mContinuityCounter = 0;
+    lTsHeader.encode(pSb);
 }
 
-void MpegTsMuxer::encode(TsFrame *frame, std::map<uint8_t, int> stream_pid_map, uint16_t pmt_pid, SimpleBuffer *sb)
+void MpegTsMuxer::encode(TsFrame *pFrame, std::map<uint8_t, int> lStreamPidMap, uint16_t lPmtPid, SimpleBuffer *pSb)
 {
-    if (should_create_pat()) {
-        uint8_t pat_pmt_cc = get_cc(0);
-        create_pat(sb, pmt_pid, pat_pmt_cc);
-        create_pmt(sb, stream_pid_map, pmt_pid, pat_pmt_cc);
+    if (shouldCreatePat()) {
+        uint8_t lPatPmtCc = getCc(0);
+        createPat(pSb, lPmtPid, lPatPmtCc);
+        createPmt(pSb, lStreamPidMap, lPmtPid, lPatPmtCc);
     }
 
-    create_pes(frame, sb);
+    createPes(pFrame, pSb);
 }
 
-uint8_t MpegTsMuxer::get_cc(uint32_t with_pid)
+uint8_t MpegTsMuxer::getCc(uint32_t lWithPid)
 {
-    if (_pid_cc_map.find(with_pid) != _pid_cc_map.end()) {
-        _pid_cc_map[with_pid] = (_pid_cc_map[with_pid] + 1) & 0x0F;
-        return _pid_cc_map[with_pid];
+    if (mPidCcMap.find(lWithPid) != mPidCcMap.end()) {
+        mPidCcMap[lWithPid] = (mPidCcMap[lWithPid] + 1) & 0x0F;
+        return mPidCcMap[lWithPid];
     }
 
-    _pid_cc_map[with_pid] = 0;
+    mPidCcMap[lWithPid] = 0;
     return 0;
 }
 
-bool MpegTsMuxer::should_create_pat()
+bool MpegTsMuxer::shouldCreatePat()
 {
-    bool ret = false;
-    static const int pat_interval = 20;
-    static int current_index = 0;
-    if (current_index % pat_interval == 0) {
-        if (current_index > 0) {
-            current_index = 0;
+    bool lRet = false;
+    static const int lPatInterval = 20;
+    static int lCurrentIndex = 0;
+    if (lCurrentIndex % lPatInterval == 0) {
+        if (lCurrentIndex > 0) {
+            lCurrentIndex = 0;
         }
-        ret = true;
+        lRet = true;
     }
 
-    current_index++;
+    lCurrentIndex++;
 
-    return ret;
+    return lRet;
 }

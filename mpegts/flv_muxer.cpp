@@ -12,65 +12,65 @@ static const int FLV_TAG_HEADER_SIZE = 11;
 class FLVTagType
 {
 public:
-    static const uint8_t Audio = 8;
-    static const uint8_t Video = 9;
-    static const uint8_t ScriptData = 18;
+    static const uint8_t mAudio = 8;
+    static const uint8_t mVideo = 9;
+    static const uint8_t mScriptData = 18;
 };
 
 class NALU
 {
 public:
-    int type;
-    uint32_t size;
-    char *data;
+    int mType;
+    uint32_t mSize;
+    char *mpData;
 };
 
-inline int get_nalu(NALU &nalu, char *data, uint32_t size, uint32_t index)
+inline int getNalu(NALU &rNalu, char *pData, uint32_t lSize, uint32_t lIndex)
 {
-    nalu.type = 0;
-    int ret = -1;
-    uint32_t i = index;
+    rNalu.mType = 0;
+    int lRet = -1;
+    uint32_t lI = lIndex;
 
-    while (i < size) {
-        if (data[i++] == 0x00
-            && data[i++] == 0x00
-            && data[i++] == 0x00
-            && data[i++] == 0x01) {
-            int pos = i;
+    while (lI < lSize) {
+        if (pData[lI++] == 0x00
+            && pData[lI++] == 0x00
+            && pData[lI++] == 0x00
+            && pData[lI++] == 0x01) {
+            int lPos = lI;
 
-            while (pos < size) {
-                if (data[pos++] == 0x00
-                    && data[pos++] == 0x00
-                    && data[pos++] == 0x00
-                    && data[pos++] == 0x01) {
+            while (lPos < lSize) {
+                if (pData[lPos++] == 0x00
+                    && pData[lPos++] == 0x00
+                    && pData[lPos++] == 0x00
+                    && pData[lPos++] == 0x01) {
                     break;
                 }
             }
-            uint32_t nalu_size = 0;
-            if (pos == size) {
-                nalu_size = pos - i;
-                ret = pos;
-            } else if (pos > size) {
-                nalu_size = size - i;
-                ret = size;
+            uint32_t lNaluSize = 0;
+            if (lPos == lSize) {
+                lNaluSize = lPos - lI;
+                lRet = lPos;
+            } else if (lPos > lSize) {
+                lNaluSize = lSize - lI;
+                lRet = lSize;
             } else {
-                nalu_size = (pos - 4) - i;
-                ret = pos - 4;
+                lNaluSize = (lPos - 4) - lI;
+                lRet = lPos - 4;
             }
-            nalu.type = data[i] & 0x1f;
-            nalu.size = nalu_size;
-            nalu.data = &data[i];
+            rNalu.mType = pData[lI] & 0x1f;
+            rNalu.mSize = lNaluSize;
+            rNalu.mpData = &pData[lI];
 
-            return ret;
+            return lRet;
         }
     }
-    return ret;
+    return lRet;
 }
 
 FLVMuxer::FLVMuxer()
-    : has_set_start_pts(false)
-    , start_pts(0)
-    , duration(0)
+    : mHasSetStartPts(false)
+    , mStartPts(0)
+    , mDuration(0)
 {
 
 }
@@ -80,139 +80,139 @@ FLVMuxer::~FLVMuxer()
 
 }
 
-int FLVMuxer::write_header(SimpleBuffer *sb)
+int FLVMuxer::writeHeader(SimpleBuffer *pSb)
 {
-    sb->write_1byte('F');   // Signature
-    sb->write_1byte('L');
-    sb->write_1byte('V');
-    sb->write_1byte(0x01);  // version
-    sb->write_1byte(0x05);  // Audio and Video tags are present
-    sb->write_4bytes(0x00000009);   // DataOffset, Offset in bytes from start of file to start of body (that is, size of header)
-    sb->write_4bytes(0x00000000);   // PreviousTagSize0, Always 0
+    pSb->write_1byte('F');   // Signature
+    pSb->write_1byte('L');
+    pSb->write_1byte('V');
+    pSb->write_1byte(0x01);  // version
+    pSb->write_1byte(0x05);  // Audio and Video tags are present
+    pSb->write_4bytes(0x00000009);   // DataOffset, Offset in bytes from start of file to start of body (that is, size of header)
+    pSb->write_4bytes(0x00000000);   // PreviousTagSize0, Always 0
     return 0;
 }
 
-int FLVMuxer::write_body(TsFrame *frame, SimpleBuffer *sb)
+int FLVMuxer::writeBody(TsFrame *pFrame, SimpleBuffer *pSb)
 {
-    if (frame->stream_type == MpegTsStream::AAC) {
-        write_aac_tag(frame, sb);
-    } else if (frame->stream_type == MpegTsStream::AVC) {
-        write_avc_tag(frame, sb);
+    if (pFrame->mStreamType == MpegTsStream::AAC) {
+        writeAacTag(pFrame, pSb);
+    } else if (pFrame->mStreamType == MpegTsStream::AVC) {
+        writeAvcTag(pFrame, pSb);
     }
 
-    calc_duration(frame->pts/90);
+    calcDuration(pFrame->mPts / 90);
 
     return 0;
 }
 
-int FLVMuxer::write_aac_tag(TsFrame *frame, SimpleBuffer *sb)
+int FLVMuxer::writeAacTag(TsFrame *pFrame, SimpleBuffer *pSb)
 {
-    uint32_t bodySize = 2 + frame->_data->size();
-    uint32_t pts = frame->pts / 90;
-    sb->write_1byte(FLVTagType::Audio);
-    sb->write_3bytes(bodySize);
-    sb->write_3bytes(pts);
-    sb->write_1byte((pts >> 24) & 0xff);
-    sb->write_3bytes(0x00);
-    sb->write_1byte(0xaf);
-    sb->write_1byte(0x01);
-    sb->append(frame->_data->data(), frame->_data->size());
-    sb->write_4bytes(bodySize + FLV_TAG_HEADER_SIZE);
+    uint32_t lBodySize = 2 + pFrame->mData->size();
+    uint32_t lPts = pFrame->mPts / 90;
+    pSb->write_1byte(FLVTagType::mAudio);
+    pSb->write_3bytes(lBodySize);
+    pSb->write_3bytes(lPts);
+    pSb->write_1byte((lPts >> 24) & 0xff);
+    pSb->write_3bytes(0x00);
+    pSb->write_1byte(0xaf);
+    pSb->write_1byte(0x01);
+    pSb->append(pFrame->mData->data(), pFrame->mData->size());
+    pSb->write_4bytes(lBodySize + FLV_TAG_HEADER_SIZE);
 
     return 0;
 }
 
-int FLVMuxer::write_avc_tag(TsFrame *frame, SimpleBuffer *sb)
+int FLVMuxer::writeAvcTag(TsFrame *pFrame, SimpleBuffer *pSb)
 {
-    int index = 0;
-    uint32_t pts = frame->pts / 90;
-    uint32_t dts = frame->dts / 90;
-    uint32_t cts = pts - dts;
-    uint32_t size = frame->_data->size();
-    NALU nalu;
+    int lIndex = 0;
+    uint32_t lPts = pFrame->mPts / 90;
+    uint32_t lDts = pFrame->mDts / 90;
+    uint32_t lCts = lPts - lDts;
+    uint32_t lSize = pFrame->mData->size();
+    NALU lNalu;
     do {
-        index = get_nalu(nalu, frame->_data->data(), size, index);
-        if (nalu.type == 7) {
-            spsData.erase(spsData.size());
-            spsData.append(nalu.data, nalu.size);
-        } else if (nalu.type == 8 && spsData.size() > 0) {
-            ppsData.erase(ppsData.size());
-            ppsData.append(nalu.data, nalu.size);
+        lIndex = getNalu(lNalu, pFrame->mData->data(), lSize, lIndex);
+        if (lNalu.mType == 7) {
+            mSpsData.erase(mSpsData.size());
+            mSpsData.append(lNalu.mpData, lNalu.mSize);
+        } else if (lNalu.mType == 8 && mSpsData.size() > 0) {
+            mPpsData.erase(mPpsData.size());
+            mPpsData.append(lNalu.mpData, lNalu.mSize);
 
-            uint32_t bodySize = 13 + spsData.size() + 3 + ppsData.size();
-            sb->write_1byte(FLVTagType::Video);
-            sb->write_3bytes(bodySize);
-            sb->write_3bytes(dts);
-            sb->write_1byte((dts >> 24) & 0xff);
-            sb->write_3bytes(0x00);
+            uint32_t lBodySize = 13 + mSpsData.size() + 3 + mPpsData.size();
+            pSb->write_1byte(FLVTagType::mVideo);
+            pSb->write_3bytes(lBodySize);
+            pSb->write_3bytes(lDts);
+            pSb->write_1byte((lDts >> 24) & 0xff);
+            pSb->write_3bytes(0x00);
 
-            sb->write_1byte(0x17);
-            sb->write_4bytes(0x00);
-            sb->write_1byte(0x01);
-            sb->append(spsData.data() + 1, 3);
-            sb->write_1byte(0xff);
-            sb->write_1byte(0xe1);
-            sb->write_2bytes(spsData.size());
-            sb->append(spsData.data(), spsData.size());
+            pSb->write_1byte(0x17);
+            pSb->write_4bytes(0x00);
+            pSb->write_1byte(0x01);
+            pSb->append(mSpsData.data() + 1, 3);
+            pSb->write_1byte(0xff);
+            pSb->write_1byte(0xe1);
+            pSb->write_2bytes(mSpsData.size());
+            pSb->append(mSpsData.data(), mSpsData.size());
 
-            sb->write_1byte(0x01);
-            sb->write_2bytes(ppsData.size());
-            sb->append(ppsData.data(), ppsData.size());
+            pSb->write_1byte(0x01);
+            pSb->write_2bytes(mPpsData.size());
+            pSb->append(mPpsData.data(), mPpsData.size());
 
-            sb->write_4bytes(FLV_TAG_HEADER_SIZE + bodySize);
-        } else if ((nalu.type == 1 || nalu.type == 5) && (spsData.size() > 0 && ppsData.size() > 0)) {
-            bool isKeyFrame = nalu.type == 0x05;
+            pSb->write_4bytes(FLV_TAG_HEADER_SIZE + lBodySize);
+        } else if ((lNalu.mType == 1 || lNalu.mType == 5) && (mSpsData.size() > 0 && mPpsData.size() > 0)) {
+            bool isKeyFrame = lNalu.mType == 0x05;
 
-            uint32_t bodySize = 9 + nalu.size;
-            sb->write_1byte(FLVTagType::Video);
-            sb->write_3bytes(bodySize);
-            sb->write_3bytes(dts);
-            sb->write_1byte((dts >> 24) & 0xff);
-            sb->write_3bytes(0x00);
+            uint32_t lBodySize = 9 + lNalu.mSize;
+            pSb->write_1byte(FLVTagType::mVideo);
+            pSb->write_3bytes(lBodySize);
+            pSb->write_3bytes(lDts);
+            pSb->write_1byte((lDts >> 24) & 0xff);
+            pSb->write_3bytes(0x00);
 
-            sb->write_1byte(isKeyFrame ? 0x17 : 0x27);
-            sb->write_1byte(0x01);
-            sb->write_3bytes(cts);
+            pSb->write_1byte(isKeyFrame ? 0x17 : 0x27);
+            pSb->write_1byte(0x01);
+            pSb->write_3bytes(lCts);
 
-            sb->write_4bytes(nalu.size);
-            sb->append(nalu.data, nalu.size);
+            pSb->write_4bytes(lNalu.mSize);
+            pSb->append(lNalu.mpData, lNalu.mSize);
 
-            sb->write_4bytes(FLV_TAG_HEADER_SIZE + bodySize);
+            pSb->write_4bytes(FLV_TAG_HEADER_SIZE + lBodySize);
         }
-    } while (index < size && index > 0);
+    } while (lIndex < lSize && lIndex > 0);
 
     return 0;
 }
 
-void FLVMuxer::calc_duration(uint32_t pts)
+void FLVMuxer::calcDuration(uint32_t lPts)
 {
-    if (!has_set_start_pts) {
-        has_set_start_pts = true;
-        start_pts = pts;
+    if (!mHasSetStartPts) {
+        mHasSetStartPts = true;
+        mStartPts = lPts;
     }
 
-    duration = pts - start_pts;
+    mDuration = lPts - mStartPts;
 }
 
-int FLVMuxer::write_metadata(SimpleBuffer *sb, uint32_t fileSize)
+int FLVMuxer::writeMetadata(SimpleBuffer *pSb, uint32_t lFileSize)
 {
-    SimpleBuffer bodySb;
+    SimpleBuffer lBodySb;
 
-    Amf0String amfOnMetaData("onMetaData");
-    amfOnMetaData.write(&bodySb);
+    Amf0String lAmfOnMetaData("onMetaData");
+    lAmfOnMetaData.write(&lBodySb);
 
-    Amf0EcmaArray amfEcmaArray;
-    amfEcmaArray.put("duration", new Amf0Number(duration / 1000.));
-    amfEcmaArray.put("filesize", new Amf0Number(fileSize));
-    amfEcmaArray.write(&bodySb);
+    Amf0EcmaArray lAmfEcmaArray;
+    lAmfEcmaArray.put("duration", new Amf0Number(mDuration / 1000.));
+    lAmfEcmaArray.put("filesize", new Amf0Number(lFileSize));
+    lAmfEcmaArray.write(&lBodySb);
 
-    sb->write_1byte(FLVTagType::ScriptData);
-    sb->write_3bytes(bodySb.size());
-    sb->write_3bytes(0);
-    sb->write_1byte(0);
-    sb->write_3bytes(0x00);
+    pSb->write_1byte(FLVTagType::mScriptData);
+    pSb->write_3bytes(lBodySb.size());
+    pSb->write_3bytes(0);
+    pSb->write_1byte(0);
+    pSb->write_3bytes(0x00);
 
-    sb->append(bodySb.data(), bodySb.size());
+    pSb->append(lBodySb.data(), lBodySb.size());
 
     return 0;
 }

@@ -1,5 +1,11 @@
 #pragma once
 
+// Prefixes used
+// m class member
+// p pointer (*)
+// r reference (&)
+// l local scope
+
 #include <stdint.h>
 #include <memory>
 #include <vector>
@@ -18,7 +24,7 @@ class TsFrame
 {
 public:
     TsFrame();
-    TsFrame(uint8_t st);
+    TsFrame(uint8_t lSt);
     virtual ~TsFrame(){};
 
 public:
@@ -26,15 +32,15 @@ public:
     void reset();
 
 public:
-    std::shared_ptr<SimpleBuffer> _data;
-    uint64_t pts;
-    uint64_t dts;
-    uint64_t pcr;
-    uint8_t stream_type;
-    uint8_t stream_id;
-    uint16_t pid;
-    uint16_t expected_pes_packet_length;
-    bool completed;
+    std::shared_ptr<SimpleBuffer> mData;
+    uint64_t mPts;
+    uint64_t mDts;
+    uint64_t mPcr;
+    uint8_t mStreamType;
+    uint8_t mStreamId;
+    uint16_t mPid;
+    uint16_t mExpectedPesPacketLength;
+    bool mCompleted;
 };
 
 class TsHeader
@@ -45,17 +51,17 @@ public:
 
 public:
     void encode(SimpleBuffer *sb);
-    void decode(SimpleBuffer *sb);
+    void decode(SimpleBuffer *pSb);
 
 public:
-    uint8_t sync_byte;                      // 8 bits
-    uint8_t transport_error_indicator;      // 1 bit
-    uint8_t payload_unit_start_indicator;   // 1 bit
-    uint8_t transport_priority;             // 1 bit
-    uint16_t pid;                           // 13 bits
-    uint8_t transport_scrambling_control;   // 2 bits
-    uint8_t adaptation_field_control;       // 2 bits
-    uint8_t continuity_counter;             // 4 bits
+    uint8_t mSyncByte;                      // 8 bits
+    uint8_t mTransportErrorIndicator;      // 1 bit
+    uint8_t mPayloadUnitStartIndicator;   // 1 bit
+    uint8_t mTransportPriority;             // 1 bit
+    uint16_t mPid;                           // 13 bits
+    uint8_t mTransportScramblingControl;   // 2 bits
+    uint8_t mAdaptationFieldControl;       // 2 bits
+    uint8_t mContinuityCounter;             // 4 bits
 };
 
 class PATHeader
@@ -65,44 +71,44 @@ public:
     virtual ~PATHeader();
 
 public:
-    void encode(SimpleBuffer *sb);
-    void decode(SimpleBuffer *sb);
+    void encode(SimpleBuffer *pSb);
+    void decode(SimpleBuffer *pSb);
     void print();
 
 public:
-    uint8_t table_id;                       // 8 bits
-    uint8_t section_syntax_indicator;       // 1 bit
-    uint8_t b0;                             // 1 bit
-    uint8_t reserved0;                      // 2 bits
-    uint16_t section_length;                // 12 bits
-    uint16_t transport_stream_id;           // 16 bits
-    uint8_t reserved1;                      // 2 bits
-    uint8_t version_number;                 // 5 bits
-    uint8_t current_next_indicator;         // 1 bit
-    uint8_t section_number;                 // 8 bits
-    uint8_t last_section_number;            // 8 bits
+    uint8_t mTableId;                       // 8 bits
+    uint8_t mSectionSyntaxIndicator;       // 1 bit
+    uint8_t mB0;                             // 1 bit
+    uint8_t mReserved0;                      // 2 bits
+    uint16_t mSectionLength;                // 12 bits
+    uint16_t mTransportStreamId;           // 16 bits
+    uint8_t mReserved1;                      // 2 bits
+    uint8_t mVersionNumber;                 // 5 bits
+    uint8_t mCurrentNextIndicator;         // 1 bit
+    uint8_t mSectionNumber;                 // 8 bits
+    uint8_t mLastSectionNumber;            // 8 bits
 };
 
 class PMTElementInfo
 {
 public:
     PMTElementInfo();
-    PMTElementInfo(uint8_t st, uint16_t pid);
+    PMTElementInfo(uint8_t lSt, uint16_t lPid);
     virtual ~PMTElementInfo();
 
 public:
-    void encode(SimpleBuffer *sb);
+    void encode(SimpleBuffer *pSb);
     void decode(SimpleBuffer *sb);
     uint16_t size();
     void print();
 
 public:
-    uint8_t stream_type;                    // 8 bits
-    uint8_t reserved0;                      // 3 bits
-    uint16_t elementary_PID;                // 13 bits
-    uint8_t reserved1;                      // 4 bits
-    uint16_t ES_info_length;                // 12 bits
-    std::string ES_info;
+    uint8_t mStreamType;                    // 8 bits
+    uint8_t mReserved0;                      // 3 bits
+    uint16_t mElementaryPid;                // 13 bits
+    uint8_t mReserved1;                      // 4 bits
+    uint16_t mEsInfoLength;                // 12 bits
+    std::string mEsInfo;
 };
 
 class PMTHeader
@@ -112,28 +118,28 @@ public:
     virtual ~PMTHeader();
 
 public:
-    void encode(SimpleBuffer *sb);
-    void decode(SimpleBuffer *sb);
+    void encode(SimpleBuffer *pSb);
+    void decode(SimpleBuffer *pSb);
     uint16_t size();
     void print();
 
 public:
-    uint8_t table_id;                       // 8 bits
-    uint8_t section_syntax_indicator;       // 1 bit
-    uint8_t b0;                             // 1 bit
-    uint8_t reserved0;                      // 2 bits
-    uint16_t section_length;                // 12 bits
-    uint16_t program_number;                // 16 bits
-    uint8_t reserved1;                      // 2 bits
-    uint8_t version_number;                 // 5 bits
-    uint8_t current_next_indicator;         // 1 bit
-    uint8_t section_number;                 // 8 bits
-    uint8_t last_section_number;            // 8 bits
-    uint8_t reserved2;                      // 3 bits
-    uint16_t PCR_PID;                       // 13 bits
-    uint8_t reserved3;                      // 4 bits
-    uint16_t program_info_length;           // 12 bits
-    std::vector<std::shared_ptr<PMTElementInfo>> infos;
+    uint8_t mTableId;                       // 8 bits
+    uint8_t mSectionSyntaxIndicator;       // 1 bit
+    uint8_t mB0;                             // 1 bit
+    uint8_t mReserved0;                      // 2 bits
+    uint16_t mSectionLength;                // 12 bits
+    uint16_t mProgramNumber;                // 16 bits
+    uint8_t mReserved1;                      // 2 bits
+    uint8_t mVersionNumber;                 // 5 bits
+    uint8_t mCurrentNextIndicator;         // 1 bit
+    uint8_t mSectionNumber;                 // 8 bits
+    uint8_t mLastSectionNumber;            // 8 bits
+    uint8_t mReserved2;                      // 3 bits
+    uint16_t mPcrPid;                       // 13 bits
+    uint8_t mReserved3;                      // 4 bits
+    uint16_t mProgramInfoLength;           // 12 bits
+    std::vector<std::shared_ptr<PMTElementInfo>> mInfos;
 };
 
 class AdaptationFieldHeader
@@ -143,19 +149,19 @@ public:
     virtual ~AdaptationFieldHeader();
 
 public:
-    void encode(SimpleBuffer *sb);
-    void decode(SimpleBuffer *sb);
+    void encode(SimpleBuffer *pSb);
+    void decode(SimpleBuffer *pAb);
 
 public:
-    uint8_t adaptation_field_length;                // 8 bits
-    uint8_t adaptation_field_extension_flag;        // 1 bit
-    uint8_t transport_private_data_flag;            // 1 bit
-    uint8_t splicing_point_flag;                    // 1 bit
-    uint8_t opcr_flag;                              // 1 bit
-    uint8_t pcr_flag;                               // 1 bit
-    uint8_t elementary_stream_priority_indicator;   // 1 bit
-    uint8_t random_access_indicator;                // 1 bit
-    uint8_t discontinuity_indicator;                // 1 bit
+    uint8_t mAdaptationFieldLength;                // 8 bits
+    uint8_t mAdaptationFieldExtensionFlag;        // 1 bit
+    uint8_t mTransportPrivateDataFlag;            // 1 bit
+    uint8_t mSplicingPointFlag;                    // 1 bit
+    uint8_t mOpcrFlag;                              // 1 bit
+    uint8_t mPcrFlag;                               // 1 bit
+    uint8_t mElementaryStreamPriorityIndicator;   // 1 bit
+    uint8_t mRandomAccessIndicator;                // 1 bit
+    uint8_t mSiscontinuityIndicator;                // 1 bit
 };
 
 class PESHeader
@@ -165,25 +171,25 @@ public:
     virtual ~PESHeader();
 
 public:
-    void encode(SimpleBuffer *sb);
-    void decode(SimpleBuffer *sb);
+    void encode(SimpleBuffer *pSb);
+    void decode(SimpleBuffer *pSb);
 
 public:
-    uint32_t packet_start_code;             // 24 bits
-    uint8_t stream_id;                      // 8 bits
-    uint16_t pes_packet_length;             // 16 bits
-    uint8_t original_or_copy;               // 1 bit
-    uint8_t copyright;                      // 1 bit
-    uint8_t data_alignment_indicator;       // 1 bit
-    uint8_t pes_priority;                   // 1 bit
-    uint8_t pes_scrambling_control;         // 2 bits
-    uint8_t marker_bits;                    // 2 bits
-    uint8_t pes_ext_flag;                   // 1 bit
-    uint8_t pes_crc_flag;                   // 1 bit
-    uint8_t add_copy_info_flag;             // 1 bit
-    uint8_t dsm_trick_mode_flag;            // 1 bit
-    uint8_t es_rate_flag;                   // 1 bit
-    uint8_t escr_flag;                      // 1 bit
-    uint8_t pts_dts_flags;                  // 2 bits
-    uint8_t header_data_length;             // 8 bits
+    uint32_t mPacketStartCode;             // 24 bits
+    uint8_t mStreamId;                      // 8 bits
+    uint16_t mPesPacketLength;             // 16 bits
+    uint8_t mOriginalOrCopy;               // 1 bit
+    uint8_t mCopyright;                      // 1 bit
+    uint8_t mDataAlignmentIndicator;       // 1 bit
+    uint8_t mPesPriority;                   // 1 bit
+    uint8_t mPesScramblingControl;         // 2 bits
+    uint8_t mMarkerBits;                    // 2 bits
+    uint8_t mPesExtFlag;                   // 1 bit
+    uint8_t mPesCrcFlag;                   // 1 bit
+    uint8_t mAddCopyInfoFlag;             // 1 bit
+    uint8_t mDsmTrickModeFlag;            // 1 bit
+    uint8_t mEsRateFlag;                   // 1 bit
+    uint8_t mEscrFlag;                      // 1 bit
+    uint8_t mPtsDtsFlags;                  // 2 bits
+    uint8_t mHeaderDataLength;             // 8 bits
 };

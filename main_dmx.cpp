@@ -23,11 +23,11 @@ int main(int argc, char *argv[])
 
     if (frame) {
 
-      std::cout << "GOT: " << unsigned(frame->stream_type);
+      std::cout << "GOT: " << unsigned(frame->mStreamType);
 
-      if (frame->stream_type == 0x0f) {
+      if (frame->mStreamType == 0x0f) {
         std::cout << " AAC Frame";
-      } else if (frame->stream_type == 0x1b) {
+      } else if (frame->mStreamType == 0x1b) {
         std::cout << " H.264 frame";
       }
 

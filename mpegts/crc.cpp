@@ -1,13 +1,13 @@
 #include "crc.h"
 
 // @see http://www.stmc.edu.hk/~vincent/ffmpeg_0.4.9-pre1/libavformat/mpegtsenc.c
-uint32_t crc32(const uint8_t *data, int len)
+uint32_t crc32(const uint8_t *pData, int lLen)
 {
-    int i;
-    uint32_t crc = 0xffffffff;
+    int lI;
+    uint32_t lCrc = 0xffffffff;
 
-    for (i = 0; i<len; i++)
-        crc = (crc << 8) ^ crc_table[((crc >> 24) ^ *data++) & 0xff];
+    for (lI = 0; lI < lLen; lI++)
+        lCrc = (lCrc << 8) ^ crcTable[((lCrc >> 24) ^ *pData++) & 0xff];
 
-    return crc;
+    return lCrc;
 }

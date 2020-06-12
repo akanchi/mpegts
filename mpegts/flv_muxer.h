@@ -2,8 +2,13 @@
 // Created by akanchi on 2019-12-31.
 //
 
-#ifndef MPEGTS_FLV_MUXER_H
-#define MPEGTS_FLV_MUXER_H
+#pragma once
+
+// Prefixes used
+// m class member
+// p pointer (*)
+// r reference (&)
+// l local scope
 
 #include "simple_buffer.h"
 
@@ -16,22 +21,20 @@ public:
     virtual ~FLVMuxer();
 
 public:
-    int write_header(SimpleBuffer *sb);
-    int write_body(TsFrame *frame, SimpleBuffer *sb);
-    int write_metadata(SimpleBuffer *sb, uint32_t fileSize);
+    int writeHeader(SimpleBuffer *pSb);
+    int writeBody(TsFrame *pFrame, SimpleBuffer *pSb);
+    int writeMetadata(SimpleBuffer *pSb, uint32_t lFileSize);
 
 private:
-    int write_aac_tag(TsFrame *frame, SimpleBuffer *sb);
-    int write_avc_tag(TsFrame *frame, SimpleBuffer *sb);
-    void calc_duration(uint32_t pts);
+    int writeAacTag(TsFrame *pFrame, SimpleBuffer *pSb);
+    int writeAvcTag(TsFrame *pFrame, SimpleBuffer *pSb);
+    void calcDuration(uint32_t lPts);
 
 private:
-    SimpleBuffer ppsData;
-    SimpleBuffer spsData;
-    bool has_set_start_pts;
-    uint32_t start_pts;
-    uint32_t duration;
+    SimpleBuffer mPpsData;
+    SimpleBuffer mSpsData;
+    bool mHasSetStartPts;
+    uint32_t mStartPts;
+    uint32_t mDuration;
 };
 
-
-#endif //MPEGTS_FLV_MUXER_H

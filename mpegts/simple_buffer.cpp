@@ -18,6 +18,7 @@ void SimpleBuffer::write_1byte(int8_t lVal) {
     } else {
         mData.push_back(lVal);
     }
+    mPos++;
 }
 
 void SimpleBuffer::write_2bytes(int16_t lVal) {

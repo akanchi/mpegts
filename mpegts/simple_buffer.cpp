@@ -1,7 +1,6 @@
 #include "simple_buffer.h"
 
 #include <assert.h>
-//#include <algorithm>
 #include <iterator>
 
 SimpleBuffer::SimpleBuffer(int lSize, char lVal)
@@ -19,8 +18,6 @@ void SimpleBuffer::write_1byte(int8_t lVal) {
     } else {
         mData.push_back(lVal);
     }
-
-    mPos += 1;
 }
 
 void SimpleBuffer::write_2bytes(int16_t lVal) {
@@ -133,18 +130,6 @@ int64_t SimpleBuffer::read_8bytes() {
     return lVal;
 }
 
-int64_t SimpleBuffer::read_nbytes(int lN) {
-    assert(require(lN));
-
-    int64_t lVal = 0;
-    char *p = (char *) &lVal;
-    for (int lI = lN; lI >= 0; --lI) {
-        p[lI] = mData.at(0 + mPos);
-        mPos++;
-    }
-
-    return lVal;
-}
 
 std::string SimpleBuffer::read_string(int lLen) {
     assert(require(lLen));

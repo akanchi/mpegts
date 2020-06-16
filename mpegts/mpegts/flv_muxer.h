@@ -5,7 +5,7 @@
 #ifndef MPEGTS_FLV_MUXER_H
 #define MPEGTS_FLV_MUXER_H
 
-#include "simple_buffer.h"
+#include "../../amf0/amf0/simple_buffer.h"
 
 class TsFrame;
 

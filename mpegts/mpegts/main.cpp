@@ -63,20 +63,18 @@ int main(int argc, char *argv[])
     while (!ifile.eof()) {
         ifile.read(packet, 188);
         in.append(packet, 188);
-        in.skip(-188);
 
         TsFrame *frame = nullptr;
         demuxer.decode(&in, frame);
 
         write_file(frame);
         if (frame) {
-            frame->_data->skip(0 - frame->_data->pos());
             muxer->encode(frame, demuxer.stream_pid_map, demuxer.pmt_id, &out);
             flvMuxer->write_body(frame, &flvOutBuffer);
             outflv.write(flvOutBuffer.data(), flvOutBuffer.size());
-            flvOutBuffer.erase(flvOutBuffer.size());
+            flvOutBuffer.clear();
             outts.write(out.data(), out.size());
-            out.erase(out.size());
+            out.clear();
         }
     }
 

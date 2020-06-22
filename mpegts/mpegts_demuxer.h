@@ -10,6 +10,7 @@
 #include <stdint.h>
 #include <memory>
 #include <map>
+#include "simple_buffer.h"
 
 class SimpleBuffer;
 

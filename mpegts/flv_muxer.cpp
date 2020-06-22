@@ -5,7 +5,7 @@
 #include "flv_muxer.h"
 #include "ts_packet.h"
 #include "simple_buffer.h"
-#include "../amf0/amf0/amf0.h"
+#include "amf0.h"
 
 static const int FLV_TAG_HEADER_SIZE = 11;
 
@@ -123,10 +123,10 @@ int FLVMuxer::writeAvcTag(TsFrame *pFrame, SimpleBuffer *pSb) {
     do {
         lIndex = getNalu(lNalu, pFrame->mData->data(), lSize, lIndex);
         if (lNalu.mType == 7) {
-            mSpsData.erase(mSpsData.size());
+            mSpsData.clear();
             mSpsData.append(lNalu.mpData, lNalu.mSize);
         } else if (lNalu.mType == 8 && mSpsData.size() > 0) {
-            mPpsData.erase(mPpsData.size());
+            mPpsData.clear();
             mPpsData.append(lNalu.mpData, lNalu.mSize);
 
             uint32_t lBodySize = 13 + mSpsData.size() + 3 + mPpsData.size();

@@ -19,10 +19,12 @@ ExternalProject_Add(project_amf0
         )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/mpegts/)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/amf0/amf0)
 
 SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/amf0/amf0/amf0.cpp PROPERTIES GENERATED TRUE )
+SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/amf0/amf0/simple_buffer.cpp PROPERTIES GENERATED TRUE )
 file(GLOB libfiles ${CMAKE_CURRENT_SOURCE_DIR}/mpegts/*.cpp)
-add_library(mpegts STATIC ${libfiles} ${CMAKE_CURRENT_SOURCE_DIR}/amf0/amf0/amf0.cpp)
+add_library(mpegts STATIC ${libfiles} ${CMAKE_CURRENT_SOURCE_DIR}/amf0/amf0/amf0.cpp ${CMAKE_CURRENT_SOURCE_DIR}/amf0/amf0/simple_buffer.cpp)
 add_dependencies(mpegts project_amf0)
 
 add_executable(mpeg_ts_tests ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)

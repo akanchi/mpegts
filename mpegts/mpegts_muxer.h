@@ -8,6 +8,7 @@
 
 #include <map>
 #include <stdint.h>
+#include "simple_buffer.h"
 
 class SimpleBuffer;
 

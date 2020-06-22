@@ -74,9 +74,9 @@ int main(int argc, char *argv[])
             muxer->encode(frame, demuxer.mStreamPidMap, demuxer.mPmtId, &out);
             flvMuxer->writeBody(frame, &flvOutBuffer);
             outflv.write(flvOutBuffer.data(), flvOutBuffer.size());
-            flvOutBuffer.erase(flvOutBuffer.size());
+            flvOutBuffer.clear();
             outts.write(out.data(), out.size());
-            out.erase(out.size());
+            out.clear();
         }
     }
 

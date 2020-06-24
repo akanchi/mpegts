@@ -115,7 +115,8 @@ int MpegTsDemuxer::decode(SimpleBuffer *in, TsFrame *&out)
                         } else {
                             _ts_frames[ts_header.pid]->_data->append(in->data() + in->pos(), pes_header.pes_packet_length - 3 - pes_header.header_data_length);
                         }
-                        break;
+                        in->skip(188 - (in->pos() - pos));
+                        continue;
                     }
                 }
                 

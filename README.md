@@ -1,5 +1,5 @@
 # mpegts
-A simple implement of mpegts(include muxer and demuxer)
+A simple implementation of mpegts(including muxer and demuxer)
 
 
 # Usage

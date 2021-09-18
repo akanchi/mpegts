@@ -110,17 +110,19 @@ int MpegTsDemuxer::decode(SimpleBuffer *in, TsFrame *&out)
                         _ts_frames[ts_header.pid]->dts = read_pts(in);
                     }
                     if (pes_header.pes_packet_length != 0) {
-                        if ((pes_header.pes_packet_length - 3 - pes_header.header_data_length) >= 188 || (pes_header.pes_packet_length - 3 - pes_header.header_data_length) < 0) {
+                        int payload_length = pes_header.pes_packet_length - 3 - pes_header.header_data_length;
+                        if (payload_length >= 188 || payload_length < 0) {
                             _ts_frames[ts_header.pid]->_data->append(in->data() + in->pos(), 188 - (in->pos() - pos));
                         } else {
-                            _ts_frames[ts_header.pid]->_data->append(in->data() + in->pos(), pes_header.pes_packet_length - 3 - pes_header.header_data_length);
+                            _ts_frames[ts_header.pid]->_data->append(in->data() + in->pos(), payload_length);
                         }
                         in->skip(188 - (in->pos() - pos));
                         continue;
                     }
                 }
                 
-                if(_ts_frames[ts_header.pid]->expected_pes_packet_length != 0 && _ts_frames[ts_header.pid]->_data->size() + 188 - (in->pos() - pos) > _ts_frames[ts_header.pid]->expected_pes_packet_length) {
+                if (_ts_frames[ts_header.pid]->expected_pes_packet_length != 0 &&
+                    _ts_frames[ts_header.pid]->_data->size() + 188 - (in->pos() - pos) > _ts_frames[ts_header.pid]->expected_pes_packet_length) {
                     _ts_frames[ts_header.pid]->_data->append(in->data() + in->pos(), _ts_frames[ts_header.pid]->expected_pes_packet_length - _ts_frames[ts_header.pid]->_data->size());
                 } else {
                     _ts_frames[ts_header.pid]->_data->append(in->data() + in->pos(), 188 - (in->pos() - pos));
